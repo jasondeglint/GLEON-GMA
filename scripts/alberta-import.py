@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-# Script to import Florida data into pandas DataFrame, format headers,
+# Script to import Alberta data into pandas DataFrame, format headers,
 # and save as a pickle file
 
 alberta = '../data/Alberta_microcystin_lakes2005to2009.csv'
@@ -16,7 +16,7 @@ df['DATETIME'] = pd.to_datetime(df['SAMPLE_DATETIME.1']).\
     dt.strftime('%Y/%m/%d')
 
 df.rename(columns={"M_LATITUDE": "LAT",
-                   "M_LONGITUDE": "LONG",
+                   "LONGITUDE": "LONG",
                    "secchi.m": "Secchi Depth (m)",
                    "MC": "Microcysticn (ug/L)",
                    "TP.mg.L": "Total Phosphorous (ug/L)",
