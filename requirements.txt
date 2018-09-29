@@ -1,0 +1,7 @@
+numpy
+pandas
+jupyter
+plotly
+
+In order to run display plotly plots in the jupyter notebook, run:
+jupyter labextension install @jupyterlab/plotly-extension
