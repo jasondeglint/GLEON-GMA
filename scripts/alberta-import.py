@@ -18,8 +18,8 @@ df['DATETIME'] = pd.to_datetime(df['SAMPLE_DATETIME.1']).\
 df.rename(columns={"M_LATITUDE": "LAT",
                    "LONGITUDE": "LONG",
                    "secchi.m": "Secchi Depth (m)",
-                   "MC": "Microcysticn (ug/L)",
-                   "TP.mg.L": "Total Phosphorous (ug/L)",
+                   "MC": "Microcystin (ug/L)",
+                   "TP.mg.L": "Total Phosphorus (ug/L)",
                    "TN.mg.L": "Total Nitrogen (ug/L)",
                    "chla.ug.L": "Total Chlorophyll (ug/L)",
                    "Station Type": "Body of Water",
@@ -27,6 +27,6 @@ df.rename(columns={"M_LATITUDE": "LAT",
                    "STN_NO_NM_LOC": "Body of Water Name"},
           inplace=True)
 
-df = df[["LAT", "LONG", "Secchi Depth (m)", "Microcysticn (ug/L)", "Total Phosphorous (ug/L)", "Total Nitrogen (ug/L)", "Total Chlorophyll (ug/L)", "Body of Water", "Temperature (degrees celsius)", "Body of Water Name", "DATETIME"]]
+df = df[["LAT", "LONG", "Secchi Depth (m)", "Microcystin (ug/L)", "Total Phosphorus (ug/L)", "Total Nitrogen (ug/L)", "Total Chlorophyll (ug/L)", "Body of Water", "Temperature (degrees celsius)", "Body of Water Name", "DATETIME"]]
 
 df.to_pickle('../data/alberta.pkl')
