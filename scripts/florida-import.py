@@ -14,15 +14,20 @@ df = df.replace('\.+', np.nan, regex=True)
 
 df['Temperature (degrees celsius)'] = np.nan
 df['Body of Water'] = 'Lake'
+df['Temperature (degrees celsius)'] = None
 
-df.rename(columns={'Latitude': 'LAT', 'Longitude': 'LONG', 'Secchi (m)': 'Secchi Depth (m)', 'Microcystin concentration (µg/L)': 'Microcystin (ug/L)', 'Total phosphorus (µg/L)': 'Total Phosphorus (ug/L)', 'Total nitrogen (µg/L)': 'Total Nitrogen (ug/L)', 'Total chlorophyll (µg/L)': 'Total Chlorophyll (ug/L)', 'Lake': 'Body of Water Name'}, inplace=True)
+df.rename(columns={'Latitude': 'LAT',
+                   'Longitude': 'LONG',
+                   'Secchi (m)': 'Secchi Depth (m)',
+                   'Microcystin concentration (µg/L)': 'Microcystin (ug/L)',
+                   'Total phosphorus (µg/L)': 'Total Phosphorus (ug/L)',
+                   'Total nitrogen (µg/L)': 'Total Nitrogen (ug/L)',
+                   'Total chlorophyll (µg/L)': 'Total Chlorophyll (ug/L)',
+                   'Lake': 'Body of Water Name'
+                  }, inplace=True)
 
-df['DATETIME'] = pd.to_datetime(df[['Year', 'Month', 'Day']])
+df['DATETIME'] = pd.to_datetime(df[['Year', 'Month', 'Day']]).dt.strftime('%Y-%m-%d %H:%M:%S')
 
 df.drop(['County', 'Year', 'Month', 'Day'], axis=1, inplace=True)
-
-#pd.set_option('display.max_columns', None)
-#pd.set_option('display.max_rows',900)
-#print(df)
 
 df.to_pickle('../data/florida.pkl')
