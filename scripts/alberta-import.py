@@ -13,7 +13,7 @@ df["STN_NO_NM_LOC"] = df["STN_NO_NM_LOC"].\
     str.strip()
 
 df['DATETIME'] = pd.to_datetime(df['SAMPLE_DATETIME.1']).\
-    dt.strftime('%Y/%m/%d')
+    dt.strftime('%Y-%m-%d %H:%M:%S')
 
 df.rename(columns={"M_LATITUDE": "LAT",
                    "LONGITUDE": "LONG",
