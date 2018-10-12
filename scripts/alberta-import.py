@@ -15,6 +15,10 @@ df["STN_NO_NM_LOC"] = df["STN_NO_NM_LOC"].\
 df['DATETIME'] = pd.to_datetime(df['SAMPLE_DATETIME.1']).\
     dt.strftime('%Y-%m-%d %H:%M:%S')
 
+# convert mg to ug
+df["TP.mg.L"] *= 1000
+df["TN.mg.L"] *= 1000
+
 df.rename(columns={"M_LATITUDE": "LAT",
                    "LONGITUDE": "LONG",
                    "secchi.m": "Secchi Depth (m)",
