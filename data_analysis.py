@@ -163,5 +163,48 @@ class DataAnalysis:
         fig = go.Figure(layout=layout, data=traces)    
         return fig
     
+    def location_max_avg_yearly(self):
+        '''
+        Get the maximum location measurements for all locations for a given year
+        '''
+
+        year = pd.to_datetime(self.df['DATETIME']).dt.year
+        years = range(np.min(year), np.max(year)+1)
+        locations = list(self.df["Body of Water Name"].unique())
+        locations.sort()
+        traces = []
+
+        for location in locations:
+            loc_data = self.df[self.df["Body of Water Name"] == location]
+            loc_year = pd.to_datetime(loc_data['DATETIME']).dt.year
+            loc_max = []
+            loc_avg = []
+            for y in years:
+                loc_y_data = loc_data[loc_year == y]
+                loc_max.append(np.max(loc_y_data["Microcystin (ug/L)"]))
+                loc_avg.append(np.mean(loc_y_data["Microcystin (ug/L)"]))
+            
+            traces.append(go.Scatter(
+                x=np.asarray(years),
+                y=np.asarray(loc_max),
+                name="Maximum [MC]",
+                visible = False
+            ))
+
+            traces.append(go.Scatter(
+                x=np.asarray(years),
+                y=np.asarray(loc_avg),
+                name="Average [MC]",
+                visible = False
+            ))
+
+        layout = go.Layout(showlegend=True) 
+        return go.Figure(data=traces, layout=layout)
+
+    def get_locations(self):
+        locations = list(self.df["Body of Water Name"].unique())
+        locations.sort()
+        return locations
+    
     def get_df(self):
         return self.df

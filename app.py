@@ -17,9 +17,11 @@ df = da.get_df()
 months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 year = pd.to_datetime(df['DATETIME']).dt.year
 years = range(np.min(year), np.max(year)+1)
+locations = da.get_locations()
 
 geo_conc_plot = da.geo_concentration_plot()
 geo_log_plot = da.log_change_plot()
+loc_year_plot = da.location_max_avg_yearly()
 
 app.layout = html.Div(children=[
     html.H1(children='Spatial MC conc'),
@@ -48,17 +50,39 @@ app.layout = html.Div(children=[
             max=11,
             value=1,
             marks={i: months[i] for i in range(len(months))}
-    ))
+    )),
+
+    html.Div(
+        dcc.Graph(
+            id="location-year-scatter",
+            figure=loc_year_plot
+        )
+    ),
+
+    html.Div(
+        dcc.Dropdown(
+        id='loc-dropdown',
+        options=[{'label': loc, 'value': loc} for loc in locations],
+        value=locations[0]
+    )),
 ])
 
 @app.callback(
     dash.dependencies.Output('geo_log_plot', 'figure'),
     [dash.dependencies.Input('year-dropdown', 'value'),
      dash.dependencies.Input('month-slider', 'value')])
-def update_graph(year, month):
+def update_log_graph(year, month):
     for i in range(len(geo_log_plot.data)):
         geo_log_plot.data[i].visible = i == years.index(year) * 12 + month
     return geo_log_plot
+
+@app.callback(
+    dash.dependencies.Output('location-year-scatter', 'figure'),
+    [dash.dependencies.Input('loc-dropdown', 'value')])
+def update_loc_graph(location):
+    for i in range(len(geo_log_plot.data)):
+        loc_year_plot.data[i].visible = i == locations.index(location) or i == locations.index(location) + 1
+    return loc_year_plot
 
 if __name__ == '__main__':
     app.run_server(debug=True)
