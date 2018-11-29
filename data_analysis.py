@@ -226,12 +226,18 @@ class DataAnalysis:
                 title="MC Concentration")) 
         return go.Figure(data=traces, layout=layout)
     
-    def tn_tp_mc(self, min_tn_tp_mc=0, max_tn_tp_mc=500):
+    def tn_tp_mc(self, min_tn=0, max_tn=0, min_tp=0, max_tp=0):
 
         USEPA_LIMIT = 4
         WHO_LIMIT = 20
 
-        dat = self.df[(self.df["TN:TP"] >= min_tn_tp_mc) & (self.df["TN:TP"] <= max_tn_tp_mc)]
+        if max_tn == 0:
+            max_tn = np.max(self.df["Total Nitrogen (ug/L)"])
+
+        if max_tp == 0:
+            max_tp = np.max(self.df["Total Phosphorus (ug/L)"])
+
+        dat = self.df[(self.df["Total Nitrogen (ug/L)"] >= min_tn) & (self.df["Total Nitrogen (ug/L)"] <= max_tn) & (self.df["Total Phosphorus (ug/L)"] >= min_tp) & (self.df["Total Phosphorus (ug/L)"] <= max_tp)]
         MC_conc = dat['Microcystin (ug/L)']
         # make bins
         b1 = dat[MC_conc <= USEPA_LIMIT]
@@ -239,8 +245,8 @@ class DataAnalysis:
         b3 = dat[MC_conc > WHO_LIMIT]
 
         data = [go.Scatter(
-            x=b1["TN:TP"],
-            y=b1["Microcystin (ug/L)"],
+            x=b1["Total Nitrogen (ug/L)"],
+            y=b1["Total Phosphorus (ug/L)"],
             mode = 'markers',
             name="<USEPA",
             marker=dict(
@@ -248,8 +254,8 @@ class DataAnalysis:
                 color = "green", #set color equal to a variable
             )),
             go.Scatter(
-            x=b2["TN:TP"],
-            y=b2["Microcystin (ug/L)"],
+            x=b2["Total Nitrogen (ug/L)"],
+            y=b2["Total Phosphorus (ug/L)"],
             mode = 'markers',
             name=">USEPA",
             marker=dict(
@@ -257,8 +263,8 @@ class DataAnalysis:
                 color = "orange" #set color equal to a variable
             )),
             go.Scatter(
-            x=b3["TN:TP"],
-            y=b3["Microcystin (ug/L)"],
+            x=b3["Total Nitrogen (ug/L)"],
+            y=b3["Total Phosphorus (ug/L)"],
             mode = 'markers',
             name=">WHO",
             marker=dict(
@@ -269,9 +275,9 @@ class DataAnalysis:
         layout = go.Layout(
             showlegend=True,
             xaxis=dict(
-                title='TN:TP'),
+                title='TN'),
             yaxis=dict(
-                title="MC Concentration")
+                title="TP")
             )
 
         return (go.Figure(data=data, layout=layout))

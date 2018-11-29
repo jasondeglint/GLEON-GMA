@@ -83,11 +83,34 @@ app.layout = html.Div(children=[
 
     html.Div(
         dcc.RangeSlider(
-            id="tn_tp_range",
+            id="tn_range",
             min=0,
-            max=np.max(df["TN:TP"]),
+            max=np.max(df["Total Nitrogen (ug/L)"]),
             step=0.5,
-            value=[0,100]
+            value=[0, np.max(df["Total Nitrogen (ug/L)"])],
+            marks={
+                1000: '1',
+                4000: '100',
+                7000: '1000',
+                10000: '10000'
+            },
+        ),
+        style={'padding': 10}
+    ),
+
+    html.Div(
+        dcc.RangeSlider(
+            id="tp_range",
+            min=0,
+            max=np.max(df["Total Phosphorus (ug/L)"]),
+            step=0.5,
+            value=[0, np.max(df["Total Phosphorus (ug/L)"])],
+            marks={
+                1000: '1',
+                4000: '100',
+                7000: '1000',
+                10000: '10000'
+            },
         ),
         style={'padding': 10}
     ),
@@ -112,9 +135,10 @@ def update_loc_graph(location):
 
 @app.callback(
     dash.dependencies.Output('tn_tp_scatter', 'figure'),
-    [dash.dependencies.Input('tn_tp_range', 'value')])
-def update_output(value):
-    return da.tn_tp_mc(value[0],value[1])
+    [dash.dependencies.Input('tn_range', 'value'),
+     dash.dependencies.Input('tp_range', 'value'),])
+def update_output(tn_val, tp_val):
+    return da.tn_tp_mc(tn_val[0],tn_val[1], tp_val[0],tp_val[1])
 
 
 if __name__ == '__main__':
