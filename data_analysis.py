@@ -170,9 +170,10 @@ class DataAnalysis:
 
         year = pd.to_datetime(self.df['DATETIME']).dt.year
         years = range(np.min(year), np.max(year)+1)
-        locations = list(self.df["Body of Water Name"].unique())
+        locations = self.get_locations()#list(self.df["Body of Water Name"].unique())
         locations.sort()
         traces = []
+        aces = []
 
         for location in locations:
             loc_data = self.df[self.df["Body of Water Name"] == location]
@@ -202,9 +203,16 @@ class DataAnalysis:
         return go.Figure(data=traces, layout=layout)
 
     def get_locations(self):
+        l = []
         locations = list(self.df["Body of Water Name"].unique())
         locations.sort()
-        return locations
+        for loc in locations:
+            locs = self.df[self.df["Body of Water Name"] == loc]
+            locs_years = pd.to_datetime(locs['DATETIME']).dt.year.unique()
+            if len(locs_years) > 2:
+                l.append(loc)
+        return l
+        
     
     def get_df(self):
         return self.df
