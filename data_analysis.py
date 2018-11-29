@@ -7,12 +7,31 @@ import numpy as np
 class DataAnalysis:
     def __init__(self):
 
+        # def get_category(conc):
+
+        #     USEPA_LIMIT = 4
+        #     WHO_LIMIT = 20
+        #     if conc < USEPA_LIMIT:
+        #         return "<USEPA"
+        #     elif conc <= WHO_LIMIT:
+        #         return "<WHO"
+        #     else:
+        #         return ">WHO"
+
+                
         alberta = pd.read_pickle("data/alberta.pkl")
         florida = pd.read_pickle("data/florida.pkl")
         self.df = pd.concat([alberta, florida], sort=False).reset_index(drop=True)
+
+        self.df["TN:TP"] = self.df["Total Nitrogen (ug/L)"]/self.df["Total Phosphorus (ug/L)"]
+
+        # self.df["conc_cat"] = self.df["Microcystin (ug/L)"].apply(get_category)
+
         self.df["MC Percent Change"] = self.df.sort_values("DATETIME").\
                             groupby(['LONG','LAT'])["Microcystin (ug/L)"].\
                             apply(lambda x: x.pct_change()).fillna(0)
+
+        
 
     def geo_concentration_plot(self):
         '''
@@ -199,8 +218,63 @@ class DataAnalysis:
                 visible = False
             ))
 
-        layout = go.Layout(showlegend=True) 
+        layout = go.Layout(
+            showlegend=True,
+            xaxis=dict(
+                title='Year'),
+            yaxis=dict(
+                title="MC Concentration")) 
         return go.Figure(data=traces, layout=layout)
+    
+    def tn_tp_mc(self, min_tn_tp_mc=0, max_tn_tp_mc=500):
+
+        USEPA_LIMIT = 4
+        WHO_LIMIT = 20
+
+        dat = self.df[(self.df["TN:TP"] >= min_tn_tp_mc) & (self.df["TN:TP"] <= max_tn_tp_mc)]
+        MC_conc = dat['Microcystin (ug/L)']
+        # make bins
+        b1 = dat[MC_conc <= USEPA_LIMIT]
+        b2 = dat[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
+        b3 = dat[MC_conc > WHO_LIMIT]
+
+        data = [go.Scatter(
+            x=b1["TN:TP"],
+            y=b1["Microcystin (ug/L)"],
+            mode = 'markers',
+            name="<USEPA",
+            marker=dict(
+                size=8,
+                color = "green", #set color equal to a variable
+            )),
+            go.Scatter(
+            x=b2["TN:TP"],
+            y=b2["Microcystin (ug/L)"],
+            mode = 'markers',
+            name=">USEPA",
+            marker=dict(
+                size=8,
+                color = "orange" #set color equal to a variable
+            )),
+            go.Scatter(
+            x=b3["TN:TP"],
+            y=b3["Microcystin (ug/L)"],
+            mode = 'markers',
+            name=">WHO",
+            marker=dict(
+                size=8,
+                color = "red", #set color equal to a variable
+            ))]
+
+        layout = go.Layout(
+            showlegend=True,
+            xaxis=dict(
+                title='TN:TP'),
+            yaxis=dict(
+                title="MC Concentration")
+            )
+
+        return (go.Figure(data=data, layout=layout))
 
     def get_locations(self):
         l = []
@@ -212,7 +286,6 @@ class DataAnalysis:
             if len(locs_years) > 2:
                 l.append(loc)
         return l
-        
     
     def get_df(self):
         return self.df
