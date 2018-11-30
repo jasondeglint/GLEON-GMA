@@ -245,8 +245,8 @@ class DataAnalysis:
         b3 = dat[MC_conc > WHO_LIMIT]
 
         data = [go.Scatter(
-            x=b1["Total Nitrogen (ug/L)"],
-            y=b1["Total Phosphorus (ug/L)"],
+            x=np.log(b1["Total Nitrogen (ug/L)"]),
+            y=np.log(b1["Total Phosphorus (ug/L)"]),
             mode = 'markers',
             name="<USEPA",
             marker=dict(
@@ -254,8 +254,8 @@ class DataAnalysis:
                 color = "green", #set color equal to a variable
             )),
             go.Scatter(
-            x=b2["Total Nitrogen (ug/L)"],
-            y=b2["Total Phosphorus (ug/L)"],
+            x=np.log(b2["Total Nitrogen (ug/L)"]),
+            y=np.log(b2["Total Phosphorus (ug/L)"]),
             mode = 'markers',
             name=">USEPA",
             marker=dict(
@@ -263,8 +263,8 @@ class DataAnalysis:
                 color = "orange" #set color equal to a variable
             )),
             go.Scatter(
-            x=b3["Total Nitrogen (ug/L)"],
-            y=b3["Total Phosphorus (ug/L)"],
+            x=np.log(b3["Total Nitrogen (ug/L)"]),
+            y=np.log(b3["Total Phosphorus (ug/L)"]),
             mode = 'markers',
             name=">WHO",
             marker=dict(
@@ -275,9 +275,9 @@ class DataAnalysis:
         layout = go.Layout(
             showlegend=True,
             xaxis=dict(
-                title='TN'),
+                title='log TN'),
             yaxis=dict(
-                title="TP")
+                title="log TP")
             )
 
         return (go.Figure(data=data, layout=layout))
