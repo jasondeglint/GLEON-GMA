@@ -16,7 +16,7 @@ Note: nodejs and npm also need to be installed on the system
 
 To run the DASH application, run the following commands
 ```
-git clone https://github.com/jasondeglint/GLEON-GMA/edit/master/README.md
+git clone https://github.com/jasondeglint/GLEON-GMA/
 cd GLEON-GMA
 pip install -r requirements.txt
 python app.py
