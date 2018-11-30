@@ -14,7 +14,10 @@ In order to run display plotly plots in the jupyter notebook, run:
 jupyter labextension install @jupyterlab/plotly-extension
 Note: nodejs and npm also need to be installed on the system
 
+To run the DASH application, run the following commands
+```
 git clone https://github.com/jasondeglint/GLEON-GMA/edit/master/README.md
 cd GLEON-GMA
 pip install -r requirements.txt
 python app.py
+```
