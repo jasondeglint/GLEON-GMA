@@ -3,3 +3,8 @@
 .ipynb_checkpoints/
 scripts/.*
 bin/
+lib/
+*.cfg
+etc/
+share/
+pip-selfcheck.json
