@@ -14,10 +14,24 @@ In order to run display plotly plots in the jupyter notebook, run:
 jupyter labextension install @jupyterlab/plotly-extension
 Note: nodejs and npm also need to be installed on the system
 
+
+### Dash Application
+This project requires Python 3.7. Please refer to the instructions for installing Python 3.7 and setting the path variable:
+https://www.python.org/downloads/
+
+Also ensure that the pipenv has been installed. To install pipenv, run:
+
+```
+pip install pipenv  " replace pip with pip3 or the appropriate environment variable
+```
+
 To run the DASH application, run the following commands
 ```
 git clone https://github.com/jasondeglint/GLEON-GMA/
 cd GLEON-GMA
-pip install -r requirements.txt
-python app.py
+python -m pipenv install
+python -m pipenv run app.py
 ```
+
+### Next Steps
+1. Incorpoprate additional data into analysis.
