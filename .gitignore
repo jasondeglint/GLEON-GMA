@@ -8,3 +8,4 @@ lib/
 etc/
 share/
 pip-selfcheck.json
+__pycache__
