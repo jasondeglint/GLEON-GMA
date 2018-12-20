@@ -5,6 +5,11 @@ import plotly.graph_objs as go
 import numpy as np
 
 class DataAnalysis:
+    """
+    A class intended to store code pertaining to the generation of graphs.
+    A separate class was created so that logic written in the Jupyter Notebook can be easily transferred
+    to this class.
+    """
     def __init__(self):
 
         # def get_category(conc):
@@ -40,8 +45,6 @@ class DataAnalysis:
 
         USEPA_LIMIT = 4
         WHO_LIMIT = 20
-
-        MC_level = self.df['Microcystin (ug/L)']
         opacity_level = 0.8
 
         month = pd.to_datetime(self.df['DATETIME']).dt.month

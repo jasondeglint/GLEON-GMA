@@ -1,6 +1,4 @@
 .DS_STORE
-*.swp
-.ipynb_checkpoints/
 scripts/.*
 bin/
 lib/
@@ -9,3 +7,4 @@ etc/
 share/
 pip-selfcheck.json
 __pycache__
+.*
