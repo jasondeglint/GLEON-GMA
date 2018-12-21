@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
 import re
-from settings import df, months, cols, year, years, locations, USEPA_LIMIT, WHO_LIMIT 
+from settings import df, months, years, cols, locations, USEPA_LIMIT, WHO_LIMIT 
 
 def geo_log_plot(selected_data):
     selected_data["MC_pc_bin"] = np.log(np.abs(selected_data["MC Percent Change"]) + 1)
@@ -164,14 +164,44 @@ def tn_tp(tn_val, tp_val):
     return (go.Figure(data=data, layout=layout))
 
 def temporal_lake(selected_col, selected_loc):
-
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
  
     selected_data = df[df['Body of Water Name'] == selected_loc]
     x_data=pd.to_datetime(selected_data['DATETIME'])
     y_data=selected_data[selected_col]
+    
+    layout = go.Layout(
+        title= '%s Trends' % (selected_col_stripped), 
+        xaxis={'title':'Date'},
+        yaxis={'title': str(selected_col)}
+    )
+    temporal_lake_plot = plot_line(x_data, y_data, layout)
+    return temporal_lake_plot
 
+def temporal_overall(selected_col, selected_type):
+    selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
+    selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
+    selected_data = df[['DATETIME', selected_col]]
+    months = pd.to_datetime(selected_data['DATETIME']).dt.to_period("M")
+    selected_data_month = selected_data.groupby(months)
+    selected_data_month = selected_data_month.agg(['mean'])
+    x_data=selected_data_month.index.to_timestamp()
+    
+    if selected_type=='avg':
+        y_data=selected_data_month[selected_col]['mean']
+    else:
+        y_data=selected_data_month[selected_col]['mean'].pct_change()
+
+    layout = go.Layout(
+        title= '%s vs Date' %selected_col_stripped, 
+        xaxis={'title':'Date'},
+        yaxis={'title': str(selected_col)}
+    )
+    temporal_overall_plot = plot_line(x_data, y_data, layout)
+    return temporal_overall_plot
+
+def plot_line(x_data, y_data, layout):
     data = go.Scatter(
         x=x_data,
         y=y_data,
@@ -183,15 +213,8 @@ def temporal_lake(selected_col, selected_loc):
             'width': 1.5
         }
     )
-    
-    layout = go.Layout(
-        title= '%s Trends' % (selected_col_stripped), 
-        xaxis={'title':'Date'},
-        yaxis={'title': str(selected_col)}
-    )
-
-    temporal_lake_plot = {
+    fig = {
         'data': [data],
         'layout': layout
     } 
-    return temporal_lake_plot
+    return fig
