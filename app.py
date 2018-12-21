@@ -93,13 +93,15 @@ app.layout = html.Div(children=[
 
     ], className="row"),
     
-    html.Div([
+    html.Div(
+        [
         html.Div([
+            html.H2('Data Trends by Lake'),
             dcc.Graph(
                 id="temporal-lake-scatter",
                 figure=loc_year_plot
             ),
-
+            
             dcc.Dropdown(
                 id="temporal-lake-col",
                 options=[{'label': c, 'value': c} for c in cols],
@@ -107,7 +109,7 @@ app.layout = html.Div(children=[
                 style={'margin-top': 10, 'z-index': 10},
                 className='six columns'
             ),
-
+            
             dcc.Dropdown(
                 id='temporal-lake-location',
                 options=[{'label': loc, 'value': loc} for loc in locations],
@@ -115,10 +117,10 @@ app.layout = html.Div(children=[
                 style={'margin-top': 10},
                 className='six columns'
             )],
-            style={'padding': 10},
             className="twelve columns"
-        )
-    ], className="row"),
+        )],
+        className="row"
+    ),
 
     # html.Div(
     #     dcc.Graph(
@@ -310,7 +312,7 @@ def temporal_lake(selected_col, selected_loc):
         }
     )
     layout = go.Layout(
-        title= 'Data Trends by Lake', 
+        title= '%s Trends for %s' %(selected_col_stripped, " ".join(w.capitalize() for w in selected_loc.split())), 
         xaxis={'title':'Date'},
         yaxis={'title': str(selected_col)}
     )
