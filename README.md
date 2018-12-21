@@ -16,6 +16,10 @@ Note: nodejs and npm also need to be installed on the system
 
 
 ### Dash Application
+
+![](cap.gif)
+
+
 This project requires Python 3.7. Please refer to the instructions for installing Python 3.7 and setting the path variable:
 https://www.python.org/downloads/
 
