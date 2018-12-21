@@ -1,6 +1,3 @@
-# TODO: integrate change, log change and percent change into the same figure
-# TODO: enable selection of all years, month range
-# TODO: integrate Sam's plots into this
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -8,15 +5,12 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
-from data_analysis import DataAnalysis
 import re
 
 USEPA_LIMIT = 4
 WHO_LIMIT = 20
 
 app = dash.Dash(__name__)
-
-da = DataAnalysis()
 
 alberta = pd.read_pickle("data/alberta.pkl")
 florida = pd.read_pickle("data/florida.pkl")
@@ -32,10 +26,7 @@ months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
 cols = ['Microcystin (ug/L)', 'Total Nitrogen (ug/L)', 'Total Phosphorus (ug/L)', 'Secchi Depth (m)', 'Total Chlorophyll (ug/L)', 'Temperature (degrees celsius)']
 year = pd.to_datetime(df['DATETIME']).dt.year
 years = range(np.min(year), np.max(year)+1)
-locations = da.get_locations()
 
-loc_year_plot = da.location_max_avg_yearly()
-tn_tp_plot = da.tn_tp_mc()
 # temporal_lake_plot = da.temporal_lake()
 
 app.layout = html.Div(children=[
@@ -73,23 +64,7 @@ app.layout = html.Div(children=[
                         marks={i: months[i] for i in range(len(months))}
                 )]),
             ],
-            style={'padding': 10},
-            className="six columns"),
-
-        html.Div([
-            dcc.Graph(
-                id="location-year-scatter",
-                figure=loc_year_plot
-            ),
-
-            dcc.Dropdown(
-                id='loc-dropdown',
-                options=[{'label': loc, 'value': loc} for loc in locations],
-                value=locations[0]
-            )],
-
-            style={'padding': 10},
-            className="six columns")
+            style={'padding': 10}),
 
     ], className="row"),
     
@@ -99,7 +74,6 @@ app.layout = html.Div(children=[
             html.H2('Data Trends by Lake'),
             dcc.Graph(
                 id="temporal-lake-scatter",
-                figure=loc_year_plot
             ),
             
             dcc.Dropdown(
@@ -108,61 +82,59 @@ app.layout = html.Div(children=[
                 value=cols[0],
                 style={'margin-top': 10, 'z-index': 10},
                 className='six columns'
-            ),
-            
-            dcc.Dropdown(
-                id='temporal-lake-location',
-                options=[{'label': loc, 'value': loc} for loc in locations],
-                value=locations[0],
-                style={'margin-top': 10},
-                className='six columns'
             )],
             className="twelve columns"
         )],
         className="row"
     ),
 
-    # html.Div(
-    #     dcc.Graph(
-    #         id="tn_tp_scatter",
-    #         figure=tn_tp_plot
-    #     ),
-    #     style={'padding': 10}
-    # ),
+    html.Div(
+        dcc.Graph(
+            id="tn_tp_scatter",
+        ),
+        style={'padding': 10},
+        className="row"
+    ),
 
-    # html.Div(
-    #     dcc.RangeSlider(
-    #         id="tn_range",
-    #         min=0,
-    #         max=np.max(df["Total Nitrogen (ug/L)"]),
-    #         step=0.5,
-    #         value=[0, np.max(df["Total Nitrogen (ug/L)"])],
-    #         marks={
-    #             1000: '1',
-    #             4000: '100',
-    #             7000: '1000',
-    #             10000: '10000'
-    #         },
-    #     ),
-    #     style={'padding': 10}
-    # ),
+    html.Div([
+        html.P("Log TN:"),
+        dcc.RangeSlider(
+            id="tn_range",
+            min=0,
+            max=np.max(df["Total Nitrogen (ug/L)"]),
+            step=0.5,
+            value=[0, np.max(df["Total Nitrogen (ug/L)"])],
+            marks={
+                1000: '1',
+                4000: '100',
+                7000: '1000',
+                10000: '10000'
+            },
+        ),
+    ],
+        style={'padding': 10},
+        className="row"
+    ),
 
-    # html.Div(
-    #     dcc.RangeSlider(
-    #         id="tp_range",
-    #         min=0,
-    #         max=np.max(df["Total Phosphorus (ug/L)"]),
-    #         step=0.5,
-    #         value=[0, np.max(df["Total Phosphorus (ug/L)"])],
-    #         marks={
-    #             1000: '1',
-    #             4000: '100',
-    #             7000: '1000',
-    #             10000: '10000'
-    #         },
-    #     ),
-    #     style={'padding': 10}
-    # ),
+    html.Div([
+        html.P("Log TP:"),
+        dcc.RangeSlider(
+            id="tp_range",
+            min=0,
+            max=np.max(df["Total Phosphorus (ug/L)"]),
+            step=0.5,
+            value=[0, np.max(df["Total Phosphorus (ug/L)"])],
+            marks={
+                1000: '1',
+                4000: '100',
+                7000: '1000',
+                10000: '10000'
+            },
+        ),
+    ],
+        style={'padding': 10},
+        className="row"
+    ),
 ])
 
 @app.callback(
@@ -189,7 +161,7 @@ def geo_log_plot(selected_data):
         lon = selected_data['LONG'],
         lat = selected_data['LAT'],
         mode = 'markers',
-        text = df['MC Percent Change'],
+        text = df["Body of Water Name"],
         visible = True,
         #name = "MC > WHO Limit",
         marker = dict(
@@ -238,7 +210,7 @@ def geo_concentration_plot(selected_data):
             lon = b1['LONG'],
             lat = b1['LAT'],
             mode = 'markers',
-            text = b1['Microcystin (ug/L)'],
+            text = b1["Body of Water Name"],
             visible = True,
             name = "MC <= USEPA Limit",
             marker=dict(color="green",opacity = opacity_level)))
@@ -246,7 +218,7 @@ def geo_concentration_plot(selected_data):
             lon = b2['LONG'],
             lat = b2['LAT'],
             mode = 'markers',
-            text = b2['Microcystin (ug/L)'],
+            text = b2["Body of Water Name"],
             visible = True,
             name = "MC <= WHO Limit",
             marker=dict(color="orange",opacity = opacity_level)))
@@ -254,7 +226,7 @@ def geo_concentration_plot(selected_data):
             lon = b3['LONG'],
             lat = b3['LAT'],
             mode = 'markers',
-            text = b3['Microcystin (ug/L)'],
+            text = b3["Body of Water Name"],
             visible = True,
             name = "MC > WHO Limit",
             marker=dict(color="red",opacity = opacity_level)))
@@ -292,50 +264,108 @@ def geo_concentration_plot(selected_data):
 @app.callback(
     dash.dependencies.Output('temporal-lake-scatter', 'figure'),
     [dash.dependencies.Input('temporal-lake-col', 'value'),
-     dash.dependencies.Input('temporal-lake-location', 'value')])
-def temporal_lake(selected_col, selected_loc):
+     dash.dependencies.Input('geo_plot', 'selectedData')])
+def temporal_lake(selected_col, selected_points):
+
+    if selected_points is None:
+        return go.Figure()
+
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
-    selected_data = df[df['Body of Water Name'] == selected_loc]
-    x_data=pd.to_datetime(selected_data['DATETIME'])
-    y_data=selected_data[selected_col]
+ 
+    locations = [point['text'] for point in selected_points["points"]] 
+    selected_data = df[df["Body of Water Name"].isin(locations)]
+    groups = selected_data.groupby("Body of Water Name")
+    traces = []
+    for name, group in groups:
+        x_data=pd.to_datetime(group['DATETIME'])
+        y_data=group[selected_col]
 
-    data = go.Scatter(
-        x=x_data,
-        y=y_data,
-        mode='lines',
-        marker={
-           'opacity': 0.8,
-        },
-        line = {
-            'width': 1.5
-        }
-    )
+        traces.append(go.Scatter(
+            x=x_data,
+            y=y_data,
+            mode='lines',
+            name =f'{name}',
+            marker={
+            'opacity': 0.8,
+            },
+            line = {
+                'width': 1.5
+            }
+        ))
     layout = go.Layout(
-        title= '%s Trends for %s' %(selected_col_stripped, " ".join(w.capitalize() for w in selected_loc.split())), 
+        title= '%s Trends' % (selected_col_stripped), 
         xaxis={'title':'Date'},
         yaxis={'title': str(selected_col)}
     )
+
     temporal_lake_plot = {
-        'data': [data],
+        'data': traces,
         'layout': layout
     } 
     return temporal_lake_plot
 
-# @app.callback(
-#     dash.dependencies.Output('location-year-scatter', 'figure'),
-#     [dash.dependencies.Input('loc-dropdown', 'value')])
-# def update_loc_graph(location):
-#     for i in range(len(geo_log_plot.data)):
-#         loc_year_plot.data[i].visible = i == locations.index(location) or i == locations.index(location) + 1
-#     return loc_year_plot
+@app.callback(
+    dash.dependencies.Output('tn_tp_scatter', 'figure'),
+    [dash.dependencies.Input('tn_range', 'value'),
+     dash.dependencies.Input('tp_range', 'value'),])
+def update_output(tn_val, tp_val):
+    min_tn = tn_val[0]
+    max_tn = tn_val[1]
+    min_tp = tp_val[0]
+    max_tp = tp_val[1]
 
-# @app.callback(
-#     dash.dependencies.Output('tn_tp_scatter', 'figure'),
-#     [dash.dependencies.Input('tn_range', 'value'),
-#      dash.dependencies.Input('tp_range', 'value'),])
-# def update_output(tn_val, tp_val):
-#     return da.tn_tp_mc(tn_val[0],tn_val[1], tp_val[0],tp_val[1])
+    if max_tn == 0:
+        max_tn = np.max(df["Total Nitrogen (ug/L)"])
+
+    if max_tp == 0:
+        max_tp = np.max(df["Total Phosphorus (ug/L)"])
+
+    dat = df[(df["Total Nitrogen (ug/L)"] >= min_tn) & (df["Total Nitrogen (ug/L)"] <= max_tn) & (df["Total Phosphorus (ug/L)"] >= min_tp) & (df["Total Phosphorus (ug/L)"] <= max_tp)]
+    MC_conc = dat['Microcystin (ug/L)']
+    # make bins
+    b1 = dat[MC_conc <= USEPA_LIMIT]
+    b2 = dat[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
+    b3 = dat[MC_conc > WHO_LIMIT]
+
+    data = [go.Scatter(
+        x=np.log(b1["Total Nitrogen (ug/L)"]),
+        y=np.log(b1["Total Phosphorus (ug/L)"]),
+        mode = 'markers',
+        name="<USEPA",
+        marker=dict(
+            size=8,
+            color = "green", #set color equal to a variable
+        )),
+        go.Scatter(
+        x=np.log(b2["Total Nitrogen (ug/L)"]),
+        y=np.log(b2["Total Phosphorus (ug/L)"]),
+        mode = 'markers',
+        name=">USEPA",
+        marker=dict(
+            size=8,
+            color = "orange" #set color equal to a variable
+        )),
+        go.Scatter(
+        x=np.log(b3["Total Nitrogen (ug/L)"]),
+        y=np.log(b3["Total Phosphorus (ug/L)"]),
+        mode = 'markers',
+        name=">WHO",
+        marker=dict(
+            size=8,
+            color = "red", #set color equal to a variable
+        ))]
+
+    layout = go.Layout(
+        showlegend=True,
+        xaxis=dict(
+            title='log TN'),
+        yaxis=dict(
+            title="log TP")
+        )
+
+    return (go.Figure(data=data, layout=layout))
+
 
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
                 "//fonts.googleapis.com/css?family=Raleway:400,300,600",
