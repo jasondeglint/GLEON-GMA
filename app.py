@@ -9,11 +9,12 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
 from data_analysis import DataAnalysis
+import re
 
 USEPA_LIMIT = 4
 WHO_LIMIT = 20
 
-app = dash.Dash("GLEON")
+app = dash.Dash(__name__)
 
 da = DataAnalysis()
 
@@ -28,12 +29,14 @@ df["MC Percent Change"] = df.sort_values("DATETIME").\
                 apply(lambda x: x.pct_change()).fillna(0)
 
 months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+cols = ['Microcystin (ug/L)', 'Total Nitrogen (ug/L)', 'Total Phosphorus (ug/L)', 'Secchi Depth (m)', 'Total Chlorophyll (ug/L)', 'Temperature (degrees celsius)']
 year = pd.to_datetime(df['DATETIME']).dt.year
 years = range(np.min(year), np.max(year)+1)
 locations = da.get_locations()
 
 loc_year_plot = da.location_max_avg_yearly()
 tn_tp_plot = da.tn_tp_mc()
+# temporal_lake_plot = da.temporal_lake()
 
 app.layout = html.Div(children=[
     html.H1(children='GLEON MC Data Analysis'),
@@ -88,7 +91,34 @@ app.layout = html.Div(children=[
             style={'padding': 10},
             className="six columns")
 
-    ]),
+    ], className="row"),
+    
+    html.Div([
+        html.Div([
+            dcc.Graph(
+                id="temporal-lake-scatter",
+                figure=loc_year_plot
+            ),
+
+            dcc.Dropdown(
+                id="temporal-lake-col",
+                options=[{'label': c, 'value': c} for c in cols],
+                value=cols[0],
+                style={'margin-top': 10, 'z-index': 10},
+                className='six columns'
+            ),
+
+            dcc.Dropdown(
+                id='temporal-lake-location',
+                options=[{'label': loc, 'value': loc} for loc in locations],
+                value=locations[0],
+                style={'margin-top': 10},
+                className='six columns'
+            )],
+            style={'padding': 10},
+            className="twelve columns"
+        )
+    ], className="row"),
 
     # html.Div(
     #     dcc.Graph(
@@ -194,7 +224,6 @@ def geo_log_plot(selected_data):
     fig = go.Figure(layout=layout, data=data)    
     return fig
 
-
 def geo_concentration_plot(selected_data):
     traces = []
     opacity_level = 0.8
@@ -257,6 +286,39 @@ def geo_concentration_plot(selected_data):
     #     for i in range(len(geo_log_plot.data)):
     #         geo_log_plot.data[i].visible = i in range(min_index, max_index)
     # return geo_log_plot
+
+@app.callback(
+    dash.dependencies.Output('temporal-lake-scatter', 'figure'),
+    [dash.dependencies.Input('temporal-lake-col', 'value'),
+     dash.dependencies.Input('temporal-lake-location', 'value')])
+def temporal_lake(selected_col, selected_loc):
+    selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
+    selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
+    selected_data = df[df['Body of Water Name'] == selected_loc]
+    x_data=pd.to_datetime(selected_data['DATETIME'])
+    y_data=selected_data[selected_col]
+
+    data = go.Scatter(
+        x=x_data,
+        y=y_data,
+        mode='lines',
+        marker={
+           'opacity': 0.8,
+        },
+        line = {
+            'width': 1.5
+        }
+    )
+    layout = go.Layout(
+        title= 'Data Trends by Lake', 
+        xaxis={'title':'Date'},
+        yaxis={'title': str(selected_col)}
+    )
+    temporal_lake_plot = {
+        'data': [data],
+        'layout': layout
+    } 
+    return temporal_lake_plot
 
 # @app.callback(
 #     dash.dependencies.Output('location-year-scatter', 'figure'),
