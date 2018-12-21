@@ -247,20 +247,6 @@ def geo_concentration_plot(selected_data):
     fig = go.Figure(layout=layout, data=traces)  
     return fig
 
-    # if type(selected_years) is not list:
-    #     selected_years = [selected_years]
-    # if len(selected_years) == 0:
-    #     for i in range(len(geo_log_plot.data)):
-    #         geo_log_plot.data[i].visible = False
-    # else:
-    #     min_index = years.index(min(selected_years)) * 12 + month
-    #     max_index = years.index(max(selected_years)) * 12 + month
-    #     if min_index == max_index:
-    #         max_index += 1
-    #     for i in range(len(geo_log_plot.data)):
-    #         geo_log_plot.data[i].visible = i in range(min_index, max_index)
-    # return geo_log_plot
-
 @app.callback(
     dash.dependencies.Output('temporal-lake-scatter', 'figure'),
     [dash.dependencies.Input('temporal-lake-col', 'value'),
