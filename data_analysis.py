@@ -29,7 +29,6 @@ def geo_log_plot(selected_data):
             cmax = selected_data['MC_pc_bin'].max(),
             colorbar=dict(
                 title="Value")
-
     ))]
 
     layout = go.Layout(title='Log Microcystin Concentration Change',
@@ -78,9 +77,10 @@ def geo_concentration_plot(selected_data):
             text = b3["Body of Water Name"],
             visible = True,
             name = "MC > WHO Limit",
-            marker=dict(color="red",opacity = opacity_level)))  
+            marker=dict(color="red",opacity = opacity_level)))
        
     layout = go.Layout(showlegend=True,
+                        title="Microcystin Concentration",
                         geo = dict(
                                 scope='north america',
                                 showframe = True,
@@ -93,20 +93,6 @@ def geo_concentration_plot(selected_data):
 
     fig = go.Figure(layout=layout, data=traces)  
     return fig
-
-    # if type(selected_years) is not list:
-    #     selected_years = [selected_years]
-    # if len(selected_years) == 0:
-    #     for i in range(len(geo_log_plot.data)):
-    #         geo_log_plot.data[i].visible = False
-    # else:
-    #     min_index = years.index(min(selected_years)) * 12 + month
-    #     max_index = years.index(max(selected_years)) * 12 + month
-    #     if min_index == max_index:
-    #         max_index += 1
-    #     for i in range(len(geo_log_plot.data)):
-    #         geo_log_plot.data[i].visible = i in range(min_index, max_index)
-    # return geo_log_plot
 
 def geo_plot(selected_years, selected_month, geo_option):
     if type(selected_years) is not list:

@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import numpy as np
 import data_analysis as da
-from settings import df, months, cols, year, years, locations, USEPA_LIMIT, WHO_LIMIT 
+from settings import df, months, cols, year, years, locations
 
 app = dash.Dash(__name__)
 
