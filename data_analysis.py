@@ -163,18 +163,25 @@ def tn_tp(tn_val, tp_val):
 
     return (go.Figure(data=data, layout=layout))
 
-def temporal_lake(selected_col, selected_loc):
+def temporal_lake(selected_col, selected_loc, selected_type):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
  
     selected_data = df[df['Body of Water Name'] == selected_loc]
     x_data=pd.to_datetime(selected_data['DATETIME'])
-    y_data=selected_data[selected_col]
+    if selected_type=='raw':
+        y_data=selected_data[selected_col]
+        title = '%s Trends' % (selected_col_stripped)
+        y_axis = str(selected_col)
+    else:
+        y_data=selected_data[selected_col].pct_change()
+        title = 'Percent Change in %s Trends' % (selected_col_stripped)
+        y_axis = 'Percent Change in %s' % (selected_col_stripped)
     
     layout = go.Layout(
-        title= '%s Trends' % (selected_col_stripped), 
+        title= title, 
         xaxis={'title':'Date'},
-        yaxis={'title': str(selected_col)}
+        yaxis={'title': y_axis}
     )
     temporal_lake_plot = plot_line(x_data, y_data, layout)
     return temporal_lake_plot
@@ -190,16 +197,52 @@ def temporal_overall(selected_col, selected_type):
     
     if selected_type=='avg':
         y_data=selected_data_month[selected_col]['mean']
+        title = '%s vs Date' %selected_col_stripped
+        y_axis = str(selected_col)
     else:
         y_data=selected_data_month[selected_col]['mean'].pct_change()
+        title = 'Percent Change of %s vs Date' %selected_col_stripped
+        y_axis = 'Percent Change of %s' %selected_col_stripped
+
+    layout = go.Layout(
+        title= title, 
+        xaxis={'title':'Date'},
+        yaxis={'title': y_axis}
+    )
+    temporal_overall_plot = plot_line(x_data, y_data, layout)
+    return temporal_overall_plot
+
+def temporal_raw(selected_option, selected_col):
+    selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
+    selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
+    selected_data = df[['DATETIME', selected_col]]
+    if selected_option == '3SD':
+        selected_data = selected_data[((selected_data[selected_col] - selected_data[selected_col].mean()) / selected_data[selected_col].std()).abs() < 3]
+    x_data = selected_data['DATETIME']
+    y_data = selected_data[selected_col]
 
     layout = go.Layout(
         title= '%s vs Date' %selected_col_stripped, 
         xaxis={'title':'Date'},
         yaxis={'title': str(selected_col)}
     )
-    temporal_overall_plot = plot_line(x_data, y_data, layout)
-    return temporal_overall_plot
+    
+    data = go.Scatter(
+        x=x_data,
+        y=y_data,
+        mode='markers',
+        marker={
+           'opacity': 0.8,
+        },
+        line = {
+            'width': 1.5
+        }
+    )
+    temporal_raw_plot = {
+        'data': [data],
+        'layout': layout
+    } 
+    return temporal_raw_plot
 
 def plot_line(x_data, y_data, layout):
     data = go.Scatter(

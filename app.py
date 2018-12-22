@@ -90,10 +90,18 @@ app.layout = html.Div(children=[
     
     html.Div([
         html.H2('Data Trends by Lake'),
-        dcc.Graph(
-            id="temporal-lake-scatter",
-        ),
-
+        html.Div([
+            html.Div([
+                dcc.Graph(
+                    id="temporal-lake-scatter",
+                )
+            ], className='six columns'),
+            html.Div([
+                dcc.Graph(
+                    id="temporal-lake-pc-scatter",
+                )
+            ], className='six columns'),
+        ]),
         dcc.Dropdown(
             id="temporal-lake-col",
             options=[{'label': c, 'value': c} for c in cols],
@@ -128,6 +136,30 @@ app.layout = html.Div(children=[
             options=[{'label': c, 'value': c} for c in cols],
             value=cols[0]
         )
+    ], className='row'),
+    
+    html.Div([
+        html.H2('Raw Data'),
+        dcc.Graph(
+            id="temporal-raw-scatter",
+        ),
+        html.Div([
+            html.Div([
+                dcc.RadioItems(
+                    id="temporal-raw-option",
+                    options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
+                            {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
+                            value='RAW'
+                )
+            ], className='six columns'),
+            html.Div([
+                dcc.Dropdown(
+                    id="temporal-raw-col",
+                    options=[{'label': c, 'value': c} for c in cols],
+                    value=cols[0]
+                )
+            ], className='six columns')
+        ])
     ], className='row')
 ])
 
@@ -144,7 +176,14 @@ def update_geo_plot(selected_years, selected_month, geo_option):
     [dash.dependencies.Input('temporal-lake-col', 'value'),
      dash.dependencies.Input('temporal-lake-location', 'value')])
 def update_output(selected_col, selected_loc):
-    return da.temporal_lake(selected_col, selected_loc)
+    return da.temporal_lake(selected_col, selected_loc, 'raw')
+
+@app.callback(
+    dash.dependencies.Output('temporal-lake-pc-scatter', 'figure'),
+    [dash.dependencies.Input('temporal-lake-col', 'value'),
+     dash.dependencies.Input('temporal-lake-location', 'value')])
+def update_output(selected_col, selected_loc):
+    return da.temporal_lake(selected_col, selected_loc, 'pc')
 
 @app.callback(
     dash.dependencies.Output('tn_tp_scatter', 'figure'),
@@ -164,6 +203,13 @@ def update_output(selected_col):
     [dash.dependencies.Input('temporal-avg-col', 'value')])
 def update_output(selected_col):
     return da.temporal_overall(selected_col, 'pc')
+
+@app.callback(
+    dash.dependencies.Output('temporal-raw-scatter', 'figure'),
+    [dash.dependencies.Input('temporal-raw-option', 'value'),
+     dash.dependencies.Input('temporal-raw-col', 'value'),])
+def update_output(selected_option, selected_col):
+    return da.temporal_raw(selected_option, selected_col)
 
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
                 "//fonts.googleapis.com/css?family=Raleway:400,300,600",
