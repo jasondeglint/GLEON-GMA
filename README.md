@@ -20,7 +20,7 @@ Note: nodejs and npm also need to be installed on the system
 ![](cap.gif)
 
 
-This project requires Python 3.7. Please refer to the instructions for installing Python 3.7 and setting the path variable:
+This project requires Python 3. Please refer to the instructions for installing Python 3 and setting the path variable on your system:
 https://www.python.org/downloads/
 
 Also ensure that the pipenv has been installed. To install pipenv, run:
