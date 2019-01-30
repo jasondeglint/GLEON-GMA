@@ -18,14 +18,24 @@ https://docs.google.com/document/d/1M-wcmNoGbqPsOTJK8EGxzJxdAKEDN3WWqqxAne5mCZI/
 
 ## Setup Environment
 
-Saba stuff here... step by step
+This project requires Python 3. Please refer to the instructions for installing Python 3 and setting the path variable on your system:
+https://www.python.org/downloads/
 
-### Installing Anaconda
+Also ensure that the pipenv has been installed. To install pipenv, run:
 
 ```
-x = 3
+pip install pipenv  " replace pip with pip3 or the appropriate environment variable
 ```
 
+### Installing Anaconda - Running jupyter notebook
+
+Please refer to installation instructions to download Anaconda for running jupyter notebook: 
+https://docs.anaconda.com/anaconda/install/
+
+To test the installation and run jupyter notebook, run the following command
+```
+jupyter notebook
+```
 
 In order to run display plotly plots in the jupyter notebook, run:
 jupyter labextension install @jupyterlab/plotly-extension
@@ -36,15 +46,6 @@ Note: nodejs and npm also need to be installed on the system
 
 ![](cap.gif)
 
-
-This project requires Python 3. Please refer to the instructions for installing Python 3 and setting the path variable on your system:
-https://www.python.org/downloads/
-
-Also ensure that the pipenv has been installed. To install pipenv, run:
-
-```
-pip install pipenv  " replace pip with pip3 or the appropriate environment variable
-```
 
 To run the DASH application, run the following commands
 ```
