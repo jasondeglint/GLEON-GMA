@@ -1,5 +1,7 @@
 # GLEON-GMA
 
+## Overview
+
 The project homepage can be found here:
 
 http://gleon.org/research/projects/global-microcystin-aggregation-gma
@@ -11,7 +13,18 @@ https://docs.google.com/document/d/1cBisJHwE5sdh0tUYPaePRuaECr24Lif8l7mhDZnvTTQ/
 
 
 GLEON summary page:
+
 https://docs.google.com/document/d/1M-wcmNoGbqPsOTJK8EGxzJxdAKEDN3WWqqxAne5mCZI/edit
+
+## Setup Environment
+
+Saba stuff here... step by step
+
+### Installing Anaconda
+
+```
+x = 3
+```
 
 
 In order to run display plotly plots in the jupyter notebook, run:
