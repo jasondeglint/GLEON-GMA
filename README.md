@@ -52,7 +52,12 @@ To run the DASH application, run the following commands
 git clone https://github.com/jasondeglint/GLEON-GMA/
 cd GLEON-GMA
 python -m pipenv install
+cd dash
 python -m pipenv run app.py
+```
+Instead of the last command to run "app.py" the following command can be used as well
+```
+pipenv run python app.py
 ```
 
 ### Next Steps
