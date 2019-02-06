@@ -91,5 +91,3 @@ Send2Trash = "==1.5.0"
 Werkzeug = "==0.14.1"
 jupyterlab = "*"
 
-[requires]
-python_version = "3.7"
