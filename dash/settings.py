@@ -4,6 +4,9 @@
 import pandas as pd
 import numpy as np
 
+# Read in database info from the matadata file
+metadataDB = pd.read_csv("data/MetadataDB.csv")
+
 # Read in data from Pickle files into Pandas dataframes, and concatenate the data
 alberta = pd.read_pickle("data/alberta.pkl")
 florida = pd.read_pickle("data/florida.pkl")
