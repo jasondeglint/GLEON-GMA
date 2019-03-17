@@ -59,7 +59,7 @@ def parse_new_database(new_dbinfo, new_df):
         new_df = new_df[["LAT", "LONG", "Secchi Depth (m)", "Microcystin (ug/L)", "Total Phosphorus (ug/L)", "Total Nitrogen (ug/L)", "Total Chlorophyll (ug/L)", "Body of Water", "Temperature (degrees celsius)", "Body of Water Name", "DATETIME"]]
 
         #save the pickle file in the data directory
-        pkldir = new_dbinfo.get_pkl_path()
+        pkldir = get_pkl_path(new_dbinfo.db_id)
         new_df.to_pickle(pkldir)
         current_metadata = metadataDB
         update_metadata(new_dbinfo, current_metadata)
@@ -85,8 +85,11 @@ def update_metadata(new_dbinfo, current_metadata):
         print(e)
         return 'Error saving metadata'
 
+def get_pkl_path(db_id):
+    return 'data/' + db_id + '.pkl'
+
 #send in selected ids either as a list of DBInfo or just ids to update dataframe
-def update_dataframe(selected_ids):
+def update_dataframe(selected_ids):    
     new_dataframe = pd.DataFrame() 
     
     # Read in data from selected Pickle files into Pandas dataframes, and concatenate the data

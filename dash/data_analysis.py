@@ -2,15 +2,15 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
 import re
-from settings import df, months, years, cols, locations, USEPA_LIMIT, WHO_LIMIT 
+from settings import months, years, cols, locations, USEPA_LIMIT, WHO_LIMIT 
 
-def geo_log_plot(selected_data):
+def geo_log_plot(selected_data, current_df):
     selected_data["MC_pc_bin"] = np.log(np.abs(selected_data["MC Percent Change"]) + 1)
     data = [go.Scattergeo(
         lon = selected_data['LONG'],
         lat = selected_data['LAT'],
         mode = 'markers',
-        text = df["Body of Water Name"],
+        text = current_df["Body of Water Name"],
         visible = True,
         #name = "MC > WHO Limit",
         marker = dict(
@@ -94,31 +94,31 @@ def geo_concentration_plot(selected_data):
     fig = go.Figure(layout=layout, data=traces)  
     return fig
 
-def geo_plot(selected_years, selected_month, geo_option):
+def geo_plot(selected_years, selected_month, geo_option, current_df):
     if type(selected_years) is not list:
         selected_years = [selected_years]
 
-    month = pd.to_datetime(df['DATETIME']).dt.month
-    year = pd.to_datetime(df['DATETIME']).dt.year
-    selected_data = df[(month == selected_month) & (year.isin(selected_years))]
+    month = pd.to_datetime(current_df['DATETIME']).dt.month
+    year = pd.to_datetime(current_df['DATETIME']).dt.year
+    selected_data = current_df[(month == selected_month) & (year.isin(selected_years))]
     if geo_option == "CONC":
         return geo_concentration_plot(selected_data)
     else:
-        return geo_log_plot(selected_data)
+        return geo_log_plot(selected_data, current_df)
 
-def tn_tp(tn_val, tp_val):
+def tn_tp(tn_val, tp_val, current_df):
     min_tn = tn_val[0]
     max_tn = tn_val[1]
     min_tp = tp_val[0]
     max_tp = tp_val[1]
 
     if max_tn == 0:
-        max_tn = np.max(df["Total Nitrogen (ug/L)"])
+        max_tn = np.max(current_df["Total Nitrogen (ug/L)"])
 
     if max_tp == 0:
-        max_tp = np.max(df["Total Phosphorus (ug/L)"])
+        max_tp = np.max(current_df["Total Phosphorus (ug/L)"])
 
-    dat = df[(df["Total Nitrogen (ug/L)"] >= min_tn) & (df["Total Nitrogen (ug/L)"] <= max_tn) & (df["Total Phosphorus (ug/L)"] >= min_tp) & (df["Total Phosphorus (ug/L)"] <= max_tp)]
+    dat = current_df[(current_df["Total Nitrogen (ug/L)"] >= min_tn) & (current_df["Total Nitrogen (ug/L)"] <= max_tn) & (current_df["Total Phosphorus (ug/L)"] >= min_tp) & (current_df["Total Phosphorus (ug/L)"] <= max_tp)]
     MC_conc = dat['Microcystin (ug/L)']
     # make bins
     b1 = dat[MC_conc <= USEPA_LIMIT]
@@ -163,11 +163,11 @@ def tn_tp(tn_val, tp_val):
 
     return (go.Figure(data=data, layout=layout))
 
-def temporal_lake(selected_col, selected_loc, selected_type):
+def temporal_lake(selected_col, selected_loc, selected_type, current_df):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
  
-    selected_data = df[df['Body of Water Name'] == selected_loc]
+    selected_data = current_df[current_df['Body of Water Name'] == selected_loc]
     x_data=pd.to_datetime(selected_data['DATETIME'])
     if selected_type=='raw':
         y_data=selected_data[selected_col]
@@ -186,10 +186,10 @@ def temporal_lake(selected_col, selected_loc, selected_type):
     temporal_lake_plot = plot_line(x_data, y_data, layout)
     return temporal_lake_plot
 
-def temporal_overall(selected_col, selected_type):
+def temporal_overall(selected_col, selected_type, current_df):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
-    selected_data = df[['DATETIME', selected_col]]
+    selected_data = current_df[['DATETIME', selected_col]]
     months = pd.to_datetime(selected_data['DATETIME']).dt.to_period("M")
     selected_data_month = selected_data.groupby(months)
     selected_data_month = selected_data_month.agg(['mean'])
@@ -212,10 +212,10 @@ def temporal_overall(selected_col, selected_type):
     temporal_overall_plot = plot_line(x_data, y_data, layout)
     return temporal_overall_plot
 
-def temporal_raw(selected_option, selected_col):
+def temporal_raw(selected_option, selected_col, current_df):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
-    selected_data = df[['DATETIME', selected_col]]
+    selected_data = current_df[['DATETIME', selected_col]]
     if selected_option == '3SD':
         selected_data = selected_data[((selected_data[selected_col] - selected_data[selected_col].mean()) / selected_data[selected_col].std()).abs() < 3]
     x_data = selected_data['DATETIME']

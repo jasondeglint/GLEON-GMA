@@ -7,6 +7,3 @@ class db_info:
         self.uploaded_by = uploaded_by
         self.institution = institution
         self.upload_date = datetime.datetime.now()
-
-    def get_pkl_path(self):
-        return 'data/' + self.db_id + '.pkl'

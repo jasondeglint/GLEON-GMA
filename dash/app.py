@@ -6,11 +6,28 @@ from dash.dependencies import Input, Output
 import numpy as np
 import pandas as pd
 import data_analysis as da
-from settings import df, months, years, cols, locations, metadataDB
+from settings import initial_df, months, years, cols, locations, metadataDB
 import db_engine as db
 from db_info import db_info
 
 app = dash.Dash(__name__)
+
+# hide the initial data in a hidden database
+current_df = initial_df
+
+def generate_hidden_data(current_dataframe):
+    '''
+        converts all the data to a JSON string
+    '''
+    jsonStr = current_dataframe.to_json(orient='split')
+    return jsonStr
+
+def convert_to_df(jsonStr):
+    '''
+        converts the JSON string back to a dataframe
+    '''
+    dff = pd.read_json(jsonStr, orient='split')
+    return dff
 
 app.layout = html.Div(children=[
     html.Div([
@@ -69,7 +86,7 @@ app.layout = html.Div(children=[
         columns=[{"name": i, "id": i} for i in metadataDB.columns],
         data=metadataDB.to_dict("rows"),
         row_selectable='multi',
-        selected_rows=[],
+        selected_rows=[0],
         style_as_list_view=True,
         style_cell={'textAlign': 'left'},
         style_header={
@@ -124,9 +141,9 @@ app.layout = html.Div(children=[
             dcc.RangeSlider(
                 id="tn_range",
                 min=0,
-                max=np.max(df["Total Nitrogen (ug/L)"]),
+                max=np.max(current_df["Total Nitrogen (ug/L)"]),
                 step=0.5,
-                value=[0, np.max(df["Total Nitrogen (ug/L)"])],
+                value=[0, np.max(current_df["Total Nitrogen (ug/L)"])],
                 marks={
                     1000: '1',
                     4000: '100',
@@ -141,9 +158,9 @@ app.layout = html.Div(children=[
             dcc.RangeSlider(
                 id="tp_range",
                 min=0,
-                max=np.max(df["Total Phosphorus (ug/L)"]),
+                max=np.max(current_df["Total Phosphorus (ug/L)"]),
                 step=0.5,
-                value=[0, np.max(df["Total Phosphorus (ug/L)"])],
+                value=[0, np.max(current_df["Total Phosphorus (ug/L)"])],
                 marks={
                     1000: '1',
                     4000: '100',
@@ -226,56 +243,82 @@ app.layout = html.Div(children=[
                 )
             ], className='six columns')
         ])
-    ], className='row')
+    ], className='row'),
+
+    # Hidden div inside the app that stores the intermediate value
+    html.Div(id='intermediate-value', style={'display': 'none'}, children=[
+        generate_hidden_data(current_df)
+    ])
 ])
 
 @app.callback(
     dash.dependencies.Output('geo_plot', 'figure'),
     [dash.dependencies.Input('year-dropdown', 'value'),
      dash.dependencies.Input('month-slider', 'value'),
-     dash.dependencies.Input('geo_plot_option','value')])
-def update_geo_plot(selected_years, selected_month, geo_option):
-    return da.geo_plot(selected_years, selected_month, geo_option)
+     dash.dependencies.Input('geo_plot_option','value'),
+     dash.dependencies.Input('intermediate-value', 'children')])
+def update_geo_plot(selected_years, selected_month, geo_option, jsonified_data):
+    jsonStr = r'{}'.format(jsonified_data[0])
+    dff = convert_to_df(jsonStr)
+    return da.geo_plot(selected_years, selected_month, geo_option, dff)
 
 @app.callback(
     dash.dependencies.Output('temporal-lake-scatter', 'figure'),
     [dash.dependencies.Input('temporal-lake-col', 'value'),
-     dash.dependencies.Input('temporal-lake-location', 'value')])
-def update_output(selected_col, selected_loc):
-    return da.temporal_lake(selected_col, selected_loc, 'raw')
+     dash.dependencies.Input('temporal-lake-location', 'value'),
+     dash.dependencies.Input('intermediate-value', 'children')])
+def update_output(selected_col, selected_loc, jsonified_data):
+    jsonStr = r'{}'.format(jsonified_data[0])
+    dff = convert_to_df(jsonStr)
+    return da.temporal_lake(selected_col, selected_loc, 'raw', dff)
 
 @app.callback(
     dash.dependencies.Output('temporal-lake-pc-scatter', 'figure'),
     [dash.dependencies.Input('temporal-lake-col', 'value'),
-     dash.dependencies.Input('temporal-lake-location', 'value')])
-def update_output(selected_col, selected_loc):
-    return da.temporal_lake(selected_col, selected_loc, 'pc')
+     dash.dependencies.Input('temporal-lake-location', 'value'),
+     dash.dependencies.Input('intermediate-value', 'children')])
+def update_output(selected_col, selected_loc, jsonified_data):
+    jsonStr = r'{}'.format(jsonified_data[0])
+    dff = convert_to_df(jsonStr)
+    return da.temporal_lake(selected_col, selected_loc, 'pc', dff)
 
 @app.callback(
     dash.dependencies.Output('tn_tp_scatter', 'figure'),
     [dash.dependencies.Input('tn_range', 'value'),
-     dash.dependencies.Input('tp_range', 'value'),])
-def update_output(tn_val, tp_val):
-    return da.tn_tp(tn_val, tp_val)
+     dash.dependencies.Input('tp_range', 'value'),
+     dash.dependencies.Input('intermediate-value', 'children')])
+def update_output(tn_val, tp_val, jsonified_data):
+    jsonStr = r'{}'.format(jsonified_data[0])
+    dff = convert_to_df(jsonStr)
+    return da.tn_tp(tn_val, tp_val, dff)
 
 @app.callback(
     dash.dependencies.Output('temporal-avg-scatter', 'figure'),
-    [dash.dependencies.Input('temporal-avg-col', 'value')])
-def update_output(selected_col):
-    return da.temporal_overall(selected_col, 'avg')
+    [dash.dependencies.Input('temporal-avg-col', 'value'),
+    dash.dependencies.Input('intermediate-value', 'children')])
+def update_output(selected_col, jsonified_data):
+    jsonStr = r'{}'.format(jsonified_data[0])
+    dff = convert_to_df(jsonStr)
+    return da.temporal_overall(selected_col, 'avg', dff)
 
 @app.callback(
     dash.dependencies.Output('temporal-pc-scatter', 'figure'),
-    [dash.dependencies.Input('temporal-avg-col', 'value')])
-def update_output(selected_col):
-    return da.temporal_overall(selected_col, 'pc')
+    [dash.dependencies.Input('temporal-avg-col', 'value'),
+    dash.dependencies.Input('intermediate-value', 'children')])
+def update_output(selected_col, jsonified_data):
+    jsonStr = r'{}'.format(jsonified_data[0])
+    dff = convert_to_df(jsonStr)
+    return da.temporal_overall(selected_col, 'pc', dff)
 
 @app.callback(
     dash.dependencies.Output('temporal-raw-scatter', 'figure'),
     [dash.dependencies.Input('temporal-raw-option', 'value'),
-     dash.dependencies.Input('temporal-raw-col', 'value'),])
-def update_output(selected_option, selected_col):
-    return da.temporal_raw(selected_option, selected_col)
+     dash.dependencies.Input('temporal-raw-col', 'value'),
+     dash.dependencies.Input('intermediate-value', 'children')])
+def update_output(selected_option, selected_col, jsonified_data):
+    jsonStr = r'{}'.format(jsonified_data[0])
+    dff = convert_to_df(jsonStr)
+    return da.temporal_raw(selected_option, selected_col, dff)
 
 @app.callback(dash.dependencies.Output('upload-output', 'children'),
               [dash.dependencies.Input('upload-data', 'contents')],
