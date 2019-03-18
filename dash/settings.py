@@ -7,8 +7,8 @@ import numpy as np
 # Read in database info from the matadata file
 metadataDB = pd.read_csv("data/MetadataDB.csv")
 
-# only load 0001 file at first 
-initial_df = pd.read_pickle("data/0001.pkl")
+# only load the alberta DB at first - default
+initial_df = pd.read_pickle("data/alberta_database_saba_ketabchi_20190317_T205702_493918.pkl")
 
 # Ratio of Total Nitrogen to Total Phosphorus
 initial_df["TN:TP"] = initial_df["Total Nitrogen (ug/L)"]/initial_df["Total Phosphorus (ug/L)"]

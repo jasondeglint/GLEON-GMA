@@ -81,6 +81,12 @@ app.layout = html.Div(children=[
         ]),  
     ], className="row"),
 
+    html.Button(id='refresh-db-button', children='Refresh', 
+                    style={
+                        'margin': '10px 0px 10px 0px'   
+                    }
+                ),
+
     dash_table.DataTable(
         id='metadata_table',
         columns=[{"name": i, "id": i} for i in metadataDB.columns],
@@ -252,6 +258,14 @@ app.layout = html.Div(children=[
 ])
 
 @app.callback(
+    dash.dependencies.Output('metadata_table', 'data'),
+    [dash.dependencies.Input('refresh-db-button', 'n_clicks')])
+def upload_file(n_clicks):
+    # read from MetadataDB to update the table 
+    metadataDB = pd.read_csv("data/MetadataDB.csv")
+    return metadataDB.to_dict("rows")    
+
+@app.callback(
     dash.dependencies.Output('geo_plot', 'figure'),
     [dash.dependencies.Input('year-dropdown', 'value'),
      dash.dependencies.Input('month-slider', 'value'),
@@ -348,9 +362,7 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename):
         elif contents is None:
             return 'Please select a file.'
         else:
-            last_index = len(metadataDB) + 1
-            db_id = "{:04d}".format(last_index)
-            new_db = db_info(db_id, dbname, username, userinst)
+            new_db = db_info(dbname, username, userinst)
             return db.upload_new_database(new_db, contents, filename)
 
 @app.callback(

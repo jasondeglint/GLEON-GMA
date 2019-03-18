@@ -79,7 +79,6 @@ def update_metadata(new_dbinfo, current_metadata):
                                 'UPLOADED_BY': [new_dbinfo.uploaded_by],
                                 'UPLOAD_DATE': [new_dbinfo.upload_date]})
         metadataDB = pd.concat([current_metadata, new_dbdf], sort=False).reset_index(drop=True)
-        #metadataDB.append(new_dbdf, ignore_index=True, sort=False)
         metadataDB.to_csv("data/MetadataDB.csv", encoding='utf-8', index=False)
     except Exception as e:
         print(e)
