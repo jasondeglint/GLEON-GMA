@@ -6,26 +6,27 @@ from dash.dependencies import Input, Output
 import numpy as np
 import pandas as pd
 import data_analysis as da
-from settings import initial_df, months, years, cols, locations, metadataDB
+from settings import months, cols, metadataDB
 import db_engine as db
 from db_info import db_info
 
 app = dash.Dash(__name__)
 
-# hide the initial data in a hidden database
-current_df = initial_df
+# initial data frame 
+empty_df = pd.DataFrame()
 
-def generate_hidden_data(current_dataframe):
+def convert_to_json(current_dataframe):
     '''
         converts all the data to a JSON string
     '''
     jsonStr = current_dataframe.to_json(orient='split')
     return jsonStr
 
-def convert_to_df(jsonStr):
+def convert_to_df(jsonified_data):
     '''
         converts the JSON string back to a dataframe
     '''
+    jsonStr = r'{}'.format(jsonified_data)
     dff = pd.read_json(jsonStr, orient='split')
     return dff
 
@@ -81,26 +82,33 @@ app.layout = html.Div(children=[
         ]),  
     ], className="row"),
 
-    html.Button(id='refresh-db-button', children='Refresh', 
-                    style={
-                        'margin': '10px 0px 10px 0px'   
-                    }
-                ),
+    html.Div([
+        html.Button(id='refresh-db-button', children='Refresh', 
+            style={
+                'margin': '10px 10px 10px 0px'   
+            }
+        ),
+        html.Button(id='apply-filters-button', children='Filter Data', 
+            style={
+                'margin': '10px 10px 10px 10px' 
+            }
+        ),
+    ]),
 
     dash_table.DataTable(
         id='metadata_table',
         columns=[{"name": i, "id": i} for i in metadataDB.columns],
         data=metadataDB.to_dict("rows"),
         row_selectable='multi',
-        selected_rows=[0],
+        selected_rows=[],
         style_as_list_view=True,
+        sorting=True,
         style_cell={'textAlign': 'left'},
         style_header={
             'backgroundColor': 'white',
             'fontWeight': 'bold'
         },
     ),
-    html.P(id='datatable-interactivity-container'),
 
     html.Div([
         html.H2('Microcystin Concentration'),
@@ -117,9 +125,7 @@ app.layout = html.Div(children=[
             html.Div(
                 dcc.Dropdown(
                     id='year-dropdown',
-                    options=[{'label': str(y), 'value': y} for y in years],
                     multi=True,
-                    value=np.min(years)
                 ),
             )
         ]),
@@ -147,9 +153,7 @@ app.layout = html.Div(children=[
             dcc.RangeSlider(
                 id="tn_range",
                 min=0,
-                max=np.max(current_df["Total Nitrogen (ug/L)"]),
                 step=0.5,
-                value=[0, np.max(current_df["Total Nitrogen (ug/L)"])],
                 marks={
                     1000: '1',
                     4000: '100',
@@ -164,9 +168,7 @@ app.layout = html.Div(children=[
             dcc.RangeSlider(
                 id="tp_range",
                 min=0,
-                max=np.max(current_df["Total Phosphorus (ug/L)"]),
                 step=0.5,
-                value=[0, np.max(current_df["Total Phosphorus (ug/L)"])],
                 marks={
                     1000: '1',
                     4000: '100',
@@ -199,8 +201,6 @@ app.layout = html.Div(children=[
         ),
         dcc.Dropdown(
             id='temporal-lake-location',
-            options=[{'label': loc, 'value': loc} for loc in locations],
-            value=locations[0],
             className='six columns'
         )
     ], className="row"),
@@ -252,9 +252,7 @@ app.layout = html.Div(children=[
     ], className='row'),
 
     # Hidden div inside the app that stores the intermediate value
-    html.Div(id='intermediate-value', style={'display': 'none'}, children=[
-        generate_hidden_data(current_df)
-    ])
+    html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(empty_df))
 ])
 
 @app.callback(
@@ -263,7 +261,7 @@ app.layout = html.Div(children=[
 def upload_file(n_clicks):
     # read from MetadataDB to update the table 
     metadataDB = pd.read_csv("data/MetadataDB.csv")
-    return metadataDB.to_dict("rows")    
+    return metadataDB.to_dict("rows")     
 
 @app.callback(
     dash.dependencies.Output('geo_plot', 'figure'),
@@ -272,8 +270,7 @@ def upload_file(n_clicks):
      dash.dependencies.Input('geo_plot_option','value'),
      dash.dependencies.Input('intermediate-value', 'children')])
 def update_geo_plot(selected_years, selected_month, geo_option, jsonified_data):
-    jsonStr = r'{}'.format(jsonified_data[0])
-    dff = convert_to_df(jsonStr)
+    dff = convert_to_df(jsonified_data)
     return da.geo_plot(selected_years, selected_month, geo_option, dff)
 
 @app.callback(
@@ -282,8 +279,7 @@ def update_geo_plot(selected_years, selected_month, geo_option, jsonified_data):
      dash.dependencies.Input('temporal-lake-location', 'value'),
      dash.dependencies.Input('intermediate-value', 'children')])
 def update_output(selected_col, selected_loc, jsonified_data):
-    jsonStr = r'{}'.format(jsonified_data[0])
-    dff = convert_to_df(jsonStr)
+    dff = convert_to_df(jsonified_data)
     return da.temporal_lake(selected_col, selected_loc, 'raw', dff)
 
 @app.callback(
@@ -292,8 +288,7 @@ def update_output(selected_col, selected_loc, jsonified_data):
      dash.dependencies.Input('temporal-lake-location', 'value'),
      dash.dependencies.Input('intermediate-value', 'children')])
 def update_output(selected_col, selected_loc, jsonified_data):
-    jsonStr = r'{}'.format(jsonified_data[0])
-    dff = convert_to_df(jsonStr)
+    dff = convert_to_df(jsonified_data)
     return da.temporal_lake(selected_col, selected_loc, 'pc', dff)
 
 @app.callback(
@@ -302,8 +297,7 @@ def update_output(selected_col, selected_loc, jsonified_data):
      dash.dependencies.Input('tp_range', 'value'),
      dash.dependencies.Input('intermediate-value', 'children')])
 def update_output(tn_val, tp_val, jsonified_data):
-    jsonStr = r'{}'.format(jsonified_data[0])
-    dff = convert_to_df(jsonStr)
+    dff = convert_to_df(jsonified_data)
     return da.tn_tp(tn_val, tp_val, dff)
 
 @app.callback(
@@ -311,8 +305,7 @@ def update_output(tn_val, tp_val, jsonified_data):
     [dash.dependencies.Input('temporal-avg-col', 'value'),
     dash.dependencies.Input('intermediate-value', 'children')])
 def update_output(selected_col, jsonified_data):
-    jsonStr = r'{}'.format(jsonified_data[0])
-    dff = convert_to_df(jsonStr)
+    dff = convert_to_df(jsonified_data)
     return da.temporal_overall(selected_col, 'avg', dff)
 
 @app.callback(
@@ -320,8 +313,7 @@ def update_output(selected_col, jsonified_data):
     [dash.dependencies.Input('temporal-avg-col', 'value'),
     dash.dependencies.Input('intermediate-value', 'children')])
 def update_output(selected_col, jsonified_data):
-    jsonStr = r'{}'.format(jsonified_data[0])
-    dff = convert_to_df(jsonStr)
+    dff = convert_to_df(jsonified_data)
     return da.temporal_overall(selected_col, 'pc', dff)
 
 @app.callback(
@@ -330,8 +322,7 @@ def update_output(selected_col, jsonified_data):
      dash.dependencies.Input('temporal-raw-col', 'value'),
      dash.dependencies.Input('intermediate-value', 'children')])
 def update_output(selected_option, selected_col, jsonified_data):
-    jsonStr = r'{}'.format(jsonified_data[0])
-    dff = convert_to_df(jsonStr)
+    dff = convert_to_df(jsonified_data)
     return da.temporal_raw(selected_option, selected_col, dff)
 
 @app.callback(dash.dependencies.Output('upload-output', 'children'),
@@ -366,16 +357,52 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename):
             return db.upload_new_database(new_db, contents, filename)
 
 @app.callback(
-    Output('datatable-interactivity-container', "children"),
-    [Input('metadata_table', "derived_virtual_selected_rows")])
-def update_graph(derived_virtual_selected_rows):
+    [dash.dependencies.Output('intermediate-value', 'children'),
+     dash.dependencies.Output('tn_range', 'max'),
+     dash.dependencies.Output('tn_range', 'value'),
+     dash.dependencies.Output('tp_range', 'max'),
+     dash.dependencies.Output('tp_range', 'value'),
+     dash.dependencies.Output('year-dropdown', 'options'),
+     dash.dependencies.Output('year-dropdown', 'value'),
+     dash.dependencies.Output('temporal-lake-location', 'options'),
+     dash.dependencies.Output('temporal-lake-location', 'value')],
+    [dash.dependencies.Input('apply-filters-button', 'n_clicks')],
+    [dash.dependencies.State('metadata_table', 'derived_virtual_selected_rows'),
+    dash.dependencies.State('metadata_table', 'derived_virtual_data')])
+def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
+    if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:       
+        # update the user's data based on the selected databases 
+        selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
+        new_df = db.update_dataframe(selected_rows)    
+        jsonStr = convert_to_json(new_df)
 
-    if derived_virtual_selected_rows is None:
-        derived_virtual_selected_rows = []
+        tn_max = np.max(new_df["Total Nitrogen (ug/L)"])
+        tn_value = [0, np.max(new_df["Total Nitrogen (ug/L)"])]
+        
+        tp_max = np.max(new_df["Total Phosphorus (ug/L)"])
+        tp_value = [0, np.max(new_df["Total Phosphorus (ug/L)"])]
+        
+        # update the date ranges
+        year = pd.to_datetime(new_df['DATETIME']).dt.year
+        years = range(np.min(year), np.max(year)+1)
+        years_options = [{'label': str(y), 'value': y} for y in years]
+        years_value = np.min(years)
 
-    return html.Div([
-            html.H6(),
-        ])
+        # update the lake locations 
+        locs = list(new_df["Body of Water Name"].unique())
+        locs.sort()
+
+        # Identify all body of waters with more than 2 years of data 
+        # locations = [] # use locations instead of locs in output 
+        # for l in locs:
+        #     l_data = new_df[new_df["Body of Water Name"] == l]
+        #     l_years = pd.to_datetime(l_data['DATETIME']).dt.year.unique()
+        #     if len(l_years) > 2:
+        #         locations.append(l)
+        locs_options = [{'label': loc, 'value': loc} for loc in locs]
+        locs_value = locs[0]
+
+        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_value, locs_options, locs_value
 
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
                 "//fonts.googleapis.com/css?family=Raleway:400,300,600",

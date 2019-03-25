@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
 import re
-from settings import months, years, cols, locations, USEPA_LIMIT, WHO_LIMIT 
+from settings import months, cols, USEPA_LIMIT, WHO_LIMIT 
 
 def geo_log_plot(selected_data, current_df):
     selected_data["MC_pc_bin"] = np.log(np.abs(selected_data["MC Percent Change"]) + 1)

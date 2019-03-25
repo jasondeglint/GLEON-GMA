@@ -84,41 +84,34 @@ def update_metadata(new_dbinfo, current_metadata):
         print(e)
         return 'Error saving metadata'
 
+def update_dataframe(selected_rows):    
+    """
+        update dataframe based on selected databases 
+    """ 
+
+    try:
+        new_dataframe = pd.DataFrame()    
+        # Read in data from selected Pickle files into Pandas dataframes, and concatenate the data
+        for row in selected_rows:
+            rowid = row["DB_ID"]
+            filepath = get_pkl_path(rowid)
+            db_data = pd.read_pickle(filepath)
+            new_dataframe = pd.concat([new_dataframe, db_data], sort=False).reset_index(drop=True)
+        
+        # Ratio of Total Nitrogen to Total Phosphorus
+        new_dataframe["TN:TP"] = new_dataframe["Total Nitrogen (ug/L)"]/new_dataframe["Total Phosphorus (ug/L)"]
+
+        # Ration of Microcystin to Total Chlorophyll
+        new_dataframe["Microcystin:Chlorophyll"] = new_dataframe["Microcystin (ug/L)"]/new_dataframe["Total Chlorophyll (ug/L)"]
+
+        # Percent change of microcystin
+        new_dataframe["MC Percent Change"] = new_dataframe.sort_values("DATETIME").\
+                                            groupby(['LONG','LAT'])["Microcystin (ug/L)"].\
+                                            apply(lambda x: x.pct_change()).fillna(0)
+        return new_dataframe
+    except Exception as e:
+        print(e)
+
 def get_pkl_path(db_id):
     return 'data/' + db_id + '.pkl'
-
-#send in selected ids either as a list of DBInfo or just ids to update dataframe
-def update_dataframe(selected_ids):    
-    new_dataframe = pd.DataFrame() 
-    
-    # Read in data from selected Pickle files into Pandas dataframes, and concatenate the data
-    for db_id in selected_ids:
-        db_df = pd.read_pickle(db_id + '.pkl')
-        new_dataframe = pd.concat([new_dataframe, db_df], sort=False).reset_index(drop=True)
-
-    # Ratio of Total Nitrogen to Total Phosphorus
-    new_dataframe["TN:TP"] = new_dataframe["Total Nitrogen (ug/L)"]/new_dataframe["Total Phosphorus (ug/L)"]
-
-    # Ration of Microcystin to Total Chlorophyll
-    new_dataframe["Microcystin:Chlorophyll"] = new_dataframe["Microcystin (ug/L)"]/new_dataframe["Total Chlorophyll (ug/L)"]
-
-    # Percent change of microcystin
-    new_dataframe["MC Percent Change"] = new_dataframe.sort_values("DATETIME").\
-                    groupby(['LONG','LAT'])["Microcystin (ug/L)"].\
-                    apply(lambda x: x.pct_change()).fillna(0)
-
-    year = pd.to_datetime(new_dataframe['DATETIME']).dt.year
-    years = range(np.min(year), np.max(year)+1)
-
-    # Identify all body of waters with more than 2 years of data
-    locations = []
-    locs = list(new_dataframe["Body of Water Name"].unique())
-    locs.sort()
-    for l in locs:
-        l_data = new_dataframe[new_dataframe["Body of Water Name"] == l]
-        l_years = pd.to_datetime(l_data['DATETIME']).dt.year.unique()
-        if len(l_years) > 2:
-            locations.append(l)
-
-    return new_dataframe
         
