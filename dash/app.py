@@ -82,18 +82,11 @@ app.layout = html.Div(children=[
         ]),  
     ], className="row"),
 
-    html.Div([
-        html.Button(id='refresh-db-button', children='Refresh', 
+    html.Button(id='refresh-db-button', children='Refresh', 
             style={
-                'margin': '10px 10px 10px 0px'   
+                'margin': '10px 0px 10px 0px'   
             }
-        ),
-        html.Button(id='apply-filters-button', children='Filter Data', 
-            style={
-                'margin': '10px 10px 10px 10px' 
-            }
-        ),
-    ]),
+    ),
 
     dash_table.DataTable(
         id='metadata_table',
@@ -108,6 +101,12 @@ app.layout = html.Div(children=[
             'backgroundColor': 'white',
             'fontWeight': 'bold'
         },
+    ),
+
+    html.Button(id='apply-filters-button', children='Filter Data', 
+            style={
+                'margin': '10px 0px 10px 0px' 
+            }
     ),
 
     html.Div([

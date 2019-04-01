@@ -58,9 +58,13 @@ def parse_new_database(new_dbinfo, new_df):
 
         new_df = new_df[["LAT", "LONG", "Secchi Depth (m)", "Microcystin (ug/L)", "Total Phosphorus (ug/L)", "Total Nitrogen (ug/L)", "Total Chlorophyll (ug/L)", "Body of Water", "Temperature (degrees celsius)", "Body of Water Name", "DATETIME"]]
 
-        #save the pickle file in the data directory
+        #save the pickle and csv file in the data directory
         pkldir = get_pkl_path(new_dbinfo.db_id)
         new_df.to_pickle(pkldir)
+
+        csvdir = get_csv_path(new_dbinfo.db_id)
+        new_df.to_csv(csvdir)
+
         current_metadata = metadataDB
         update_metadata(new_dbinfo, current_metadata)
         return u'''Database "{}" has been successfully uploaded.'''.format(new_dbinfo.db_name)
@@ -114,4 +118,7 @@ def update_dataframe(selected_rows):
 
 def get_pkl_path(db_id):
     return 'data/' + db_id + '.pkl'
+
+def get_csv_path(db_id):
+    return 'data/' + db_id + '.csv'
         
