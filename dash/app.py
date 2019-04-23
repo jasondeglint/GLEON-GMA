@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output
 import numpy as np
 import pandas as pd
 import data_analysis as da
-from settings import months, cols, metadataDB
+from settings import months, metadataDB
 import db_engine as db
 from db_info import db_info
 
@@ -194,8 +194,6 @@ app.layout = html.Div(children=[
         ]),
         dcc.Dropdown(
             id="temporal-lake-col",
-            options=[{'label': c, 'value': c} for c in cols],
-            value=cols[0],
             className='six columns'
         ),
         dcc.Dropdown(
@@ -220,9 +218,7 @@ app.layout = html.Div(children=[
             ], className='six columns'),
         ]),
         dcc.Dropdown(
-            id="temporal-avg-col",
-            options=[{'label': c, 'value': c} for c in cols],
-            value=cols[0]
+            id="temporal-avg-col"
         )
     ], className='row'),
     
@@ -242,9 +238,7 @@ app.layout = html.Div(children=[
             ], className='six columns'),
             html.Div([
                 dcc.Dropdown(
-                    id="temporal-raw-col",
-                    options=[{'label': c, 'value': c} for c in cols],
-                    value=cols[0]
+                    id="temporal-raw-col"
                 )
             ], className='six columns')
         ])
@@ -364,7 +358,13 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename):
      dash.dependencies.Output('year-dropdown', 'options'),
      dash.dependencies.Output('year-dropdown', 'value'),
      dash.dependencies.Output('temporal-lake-location', 'options'),
-     dash.dependencies.Output('temporal-lake-location', 'value')],
+     dash.dependencies.Output('temporal-lake-location', 'value'),
+     dash.dependencies.Output('temporal-lake-col', 'options'),
+     dash.dependencies.Output('temporal-lake-col', 'value'),
+     dash.dependencies.Output('temporal-avg-col', 'options'),
+     dash.dependencies.Output('temporal-avg-col', 'value'),
+     dash.dependencies.Output('temporal-raw-col', 'options'),
+     dash.dependencies.Output('temporal-raw-col', 'value')],
     [dash.dependencies.Input('apply-filters-button', 'n_clicks')],
     [dash.dependencies.State('metadata_table', 'derived_virtual_selected_rows'),
     dash.dependencies.State('metadata_table', 'derived_virtual_data')])
@@ -390,18 +390,27 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         # update the lake locations 
         locs = list(new_df["Body of Water Name"].unique())
         locs.sort()
-
-        # Identify all body of waters with more than 2 years of data 
-        # locations = [] # use locations instead of locs in output 
-        # for l in locs:
-        #     l_data = new_df[new_df["Body of Water Name"] == l]
-        #     l_years = pd.to_datetime(l_data['DATETIME']).dt.year.unique()
-        #     if len(l_years) > 2:
-        #         locations.append(l)
         locs_options = [{'label': loc, 'value': loc} for loc in locs]
         locs_value = locs[0]
 
-        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_value, locs_options, locs_value
+        # get current existing column names and remove general info to update the dropdowns of plot axes
+        colNames = new_df.columns.values.tolist()
+        if 'DATETIME' in colNames: colNames.remove('DATETIME')
+        if 'Body of Water Name' in colNames: colNames.remove('Body of Water Name')
+        if 'DataContact' in colNames: colNames.remove('DataContact')
+        if 'LONG' in colNames: colNames.remove('LONG')
+        if 'LAT' in colNames: colNames.remove('LAT')
+        if 'Comments' in colNames: colNames.remove('Comments')
+        if 'MC Percent Change' in colNames: colNames.remove('MC Percent Change')
+        if 'Maximum Depth (m)' in colNames: colNames.remove('Maximum Depth (m)')
+        if 'Mean Depth (m)' in colNames: colNames.remove('Mean Depth (m)')
+
+        colNames.sort()
+        col_options = [{'label': col, 'value': col} for col in colNames]
+        col_value = colNames[0]
+
+        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_value, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value
+
 
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
                 "//fonts.googleapis.com/css?family=Raleway:400,300,600",
