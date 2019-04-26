@@ -206,6 +206,7 @@ app.layout = html.Div(children=[
                 min=0,
                 max=11,
                 value=1,
+                included=False,
                 marks={i: months[i] for i in range(len(months))}
             )
         ]),
