@@ -38,6 +38,12 @@ app.layout = html.Div(children=[
     html.Div([
         html.Details([
             html.Summary('Upload New Data'),
+            # TODO: use for example csv download
+            # html.Div(children=[ 
+            #     # replace with a URL link once the server is setup 
+            #     html.A('Download Sample File', id='sample-data-link')
+            # ], className="row"),
+
             html.Div(children=[
                 html.Div([
                     html.Div([
@@ -51,22 +57,69 @@ app.layout = html.Div(children=[
                     html.Div([
                         html.P('Database Name'),
                         dcc.Input(id='db-name', type='text')
-                    ], className='one-third column'),   
-                ], className='row'),           
+                    ], className='one-third column'), 
+                ], className="row"),
+                html.P('Peer-Review or Publication Information'),
+                dcc.Textarea(
+                    id='publication-text',
+                    wrap=True,
+                    draggable=False,
+                    placeholder='Publication URL...',
+                    style={'width': '90%', 'resize':'None'}
+                ),
+                html.P('Field Methods'),
+                dcc.Textarea(
+                    id='field-method-text',
+                    placeholder='',
+                    style={'width': '90%', 'resize':'None'}
+                ),
+                html.P('Lab Methods'),
+                dcc.Textarea(
+                    id='lab-method-text',
+                    placeholder='',
+                    style={'width': '90%', 'resize':'None'}
+                ),
+                html.P('QA/QC Data'),
+                dcc.Textarea(
+                    id='QAQC-data-text',
+                    placeholder='',
+                    style={'width': '90%', 'resize':'None'}
+                ),
+                html.P('Are the full QA/QC data available upon request?'),
+                dcc.Textarea(
+                    id='QAQC-request-text',
+                    placeholder='',
+                    style={'width': '90%', 'resize':'None'}
+                ),
+                html.P('Cyanotoxin Method'),
+                dcc.Dropdown(
+                    id='cyano-method',
+                    multi=False,
+                    options=[
+                        {'label': 'PIPA', 'value': 'PIPA'},
+                        {'label': 'ELISA', 'value': 'ELISA'},
+                        {'label': 'LC-MSMS', 'value': 'LC-MSMS'}
+                    ],
+                    style={
+                        'margin': '0 60px 0 0',
+                        'width': '95%' 
+                    }
+                ),         
                 dcc.Upload(
                         id='upload-data',
                         children=html.Div([
                             'Drag and Drop or ',
-                            html.A('Select Files')
+                            html.A('Select Database File')
                     ]),
                     style={
-                        'width': '100%',
+                        'width': '90%',
                         'height': '60px',
                         'lineHeight': '60px',
                         'borderWidth': '1px',
                         'borderStyle': 'dashed',
                         'borderRadius': '5px',
                         'textAlign': 'center',
+                        'margin': '25px 0 0 0',
                     },
                     # allow single file upload
                     multiple=False
@@ -74,7 +127,7 @@ app.layout = html.Div(children=[
                 html.Div(id='upload-output'),
                 html.Button(id='done-button', n_clicks=0, children='Done', 
                     style={
-                        'margin': '10px 0px 10px 0px'   
+                        'margin': '15px 0px 10px 0px'   
                     }
                 ),
                 html.P(id='upload-msg'),
@@ -334,8 +387,14 @@ def update_uploaded_file(contents, filename):
     dash.dependencies.State('user-name', 'value'),
     dash.dependencies.State('user-inst', 'value'),
     dash.dependencies.State('upload-data', 'contents'),
-    dash.dependencies.State('upload-data', 'filename')])
-def upload_file(n_clicks, dbname, username, userinst, contents, filename):
+    dash.dependencies.State('upload-data', 'filename'),
+    dash.dependencies.State('publication-text', 'value'),
+    dash.dependencies.State('field-method-text', 'value'),
+    dash.dependencies.State('lab-method-text', 'value'),
+    dash.dependencies.State('QAQC-data-text', 'value'),
+    dash.dependencies.State('QAQC-request-text', 'value'),
+    dash.dependencies.State('cyano-method', 'value')])
+def upload_file(n_clicks, dbname, username, userinst, contents, filename, publicationText, fieldMText, labMText, QAQCText, QAQCRequest, cyanoMethod):
     if n_clicks != None and n_clicks > 0:
         if username == None or not username.strip():
             return 'Name field cannot be empty.'
@@ -347,6 +406,16 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename):
             return 'Please select a file.'
         else:
             new_db = db_info(dbname, username, userinst)
+
+            # update db_info variables 
+            new_db.db_publication = publicationText
+            new_db.db_field_method = fieldMText
+            new_db.db_lab_method = labMText
+            new_db.db_lab_method = labMText
+            new_db.db_QACA = QAQCText
+            new_db.db_QACA_request = QAQCRequest
+            new_db.db_cyano_method = cyanoMethod
+
             return db.upload_new_database(new_db, contents, filename)
 
 @app.callback(
@@ -410,7 +479,6 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         col_value = colNames[0]
 
         return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_value, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value
-
 
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
                 "//fonts.googleapis.com/css?family=Raleway:400,300,600",

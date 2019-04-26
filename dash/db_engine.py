@@ -107,6 +107,11 @@ def parse_new_database(new_dbinfo, new_df):
         csvdir = get_csv_path(new_dbinfo.db_id)
         new_df.to_csv(csvdir)
 
+        # update the number of lakes and samples in db_info
+        unique_lakes_list = list(new_df["Body of Water Name"].unique())
+        new_dbinfo.db_num_lakes = len(unique_lakes_list)
+        new_dbinfo.db_num_samples = new_df.shape[0]
+
         current_metadata = metadataDB
         update_metadata(new_dbinfo, current_metadata)
         return u'''Database "{}" has been successfully uploaded.'''.format(new_dbinfo.db_name)
@@ -120,10 +125,21 @@ def update_metadata(new_dbinfo, current_metadata):
         Add new database info to MetadataDB.csv
     """ 
     try:
+        metadataDB = pd.read_csv("data/MetadataDB.csv")
+        
         new_dbdf = pd.DataFrame({'DB_ID': [new_dbinfo.db_id],
-                                'DB_NAME': [new_dbinfo.db_name],
-                                'UPLOADED_BY': [new_dbinfo.uploaded_by],
-                                'UPLOAD_DATE': [new_dbinfo.upload_date]})
+                                'DB_name': [new_dbinfo.db_name],
+                                'Uploaded_by': [new_dbinfo.uploaded_by],
+                                'Upload_date': [new_dbinfo.upload_date],
+                                'Published': [new_dbinfo.db_publication],
+                                'Field_method': [new_dbinfo.db_field_method],
+                                'Lab_method': [new_dbinfo.db_lab_method],
+                                'QA_QC': [new_dbinfo.db_QACA],
+                                'QA_QC_Request': [new_dbinfo.db_QACA_request],
+                                'Cyanotoxin_method': [new_dbinfo.db_cyano_method],
+                                'N_lakes': [new_dbinfo.db_num_lakes],
+                                'N_samples': [new_dbinfo.db_num_samples]})
+
         metadataDB = pd.concat([current_metadata, new_dbdf], sort=False).reset_index(drop=True)
         metadataDB.to_csv("data/MetadataDB.csv", encoding='utf-8', index=False)
     except Exception as e:
