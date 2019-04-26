@@ -125,7 +125,7 @@ def update_metadata(new_dbinfo, current_metadata):
         Add new database info to MetadataDB.csv
     """ 
     try:
-        metadataDB = pd.read_csv("data/MetadataDB.csv")
+        current_metadata = pd.read_csv("data/MetadataDB.csv")
         
         new_dbdf = pd.DataFrame({'DB_ID': [new_dbinfo.db_id],
                                 'DB_name': [new_dbinfo.db_name],
