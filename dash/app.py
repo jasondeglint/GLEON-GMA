@@ -166,6 +166,7 @@ app.layout = html.Div(children=[
         selected_rows=[],
         style_as_list_view=True,
         sorting=True,
+        style_table={'overflowX': 'scroll'},
         style_cell={'textAlign': 'left'},
         style_header={
             'backgroundColor': 'white',
