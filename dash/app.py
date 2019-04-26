@@ -30,6 +30,14 @@ def convert_to_df(jsonified_data):
     dff = pd.read_json(jsonStr, orient='split')
     return dff
 
+def get_metadata_table_content(current_metadata):
+    '''
+        returns the data for the specified columns of the metadata data table 
+    '''
+    
+    table_df = current_metadata[['DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'Cyanotoxin_method', 'N_lakes', 'N_samples']]
+    return table_df.to_dict("rows")
+
 app.layout = html.Div(children=[
     html.Div([
         html.H1(children='GLEON MC Data Analysis')
@@ -143,8 +151,17 @@ app.layout = html.Div(children=[
 
     dash_table.DataTable(
         id='metadata_table',
-        columns=[{"name": i, "id": i} for i in metadataDB.columns],
-        data=metadataDB.to_dict("rows"),
+        columns=[
+            # the column names are seen in the UI but the id should be the same as dataframe col name 
+            # the DB ID column is hidden - later used to find DB pkl files in the filtering process
+            {'name': 'Database ID', 'id': 'DB_ID', 'hidden':True},
+            {'name': 'Database Name', 'id': 'DB_name'},
+            {'name': 'Uploaded By', 'id': 'Uploaded_by'},
+            {'name': 'Upload Date', 'id': 'Upload_date'},
+            {'name': 'Cyanotoxin Method', 'id': 'Cyanotoxin_method'},
+            {'name': 'Number of Lakes', 'id': 'N_lakes'},
+            {'name': 'Number of Samples', 'id': 'N_samples'},],
+        data=get_metadata_table_content(metadataDB), 
         row_selectable='multi',
         selected_rows=[],
         style_as_list_view=True,
@@ -307,7 +324,7 @@ app.layout = html.Div(children=[
 def upload_file(n_clicks):
     # read from MetadataDB to update the table 
     metadataDB = pd.read_csv("data/MetadataDB.csv")
-    return metadataDB.to_dict("rows")     
+    return get_metadata_table_content(metadataDB)   
 
 @app.callback(
     dash.dependencies.Output('geo_plot', 'figure'),
