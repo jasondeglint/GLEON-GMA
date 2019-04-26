@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bab511ef330e64ca9a1491d2867ddf75f9cd3c0fa56ac31fb216277ff017469c"
+            "sha256": "e84129159d7a6c6db0b4e49eec14bf60fe0f1a3f91d145c1cab625d5b6368304"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -267,11 +267,11 @@
         },
         "jinja2": {
             "hashes": [
-                "sha256:74c935a1b8bb9a3947c50a54766a969d4846290e1e788ea44c1392163723c3bd",
-                "sha256:f84be1bb0040caca4cea721fcbbbbd61f9be9464ca236387158b0feea01914a4"
+                "sha256:065c4f02ebe7f7cf559e49ee5a95fb800a9e4528727aec6f24402a5374c65013",
+                "sha256:14dd6caf1527abb21f08f86c784eac40853ba93edb79552aa1e4b8aef1b61c7b"
             ],
             "index": "pypi",
-            "version": "==2.10"
+            "version": "==2.10.1"
         },
         "jsonschema": {
             "hashes": [
@@ -307,11 +307,11 @@
         },
         "jupyterlab": {
             "hashes": [
-                "sha256:c48f092526f6d5f12b039118bd92401ab605f49d17050ac71c0d809e86b15036",
-                "sha256:deba0b2803640fcad72c61366bff11d5945173015961586d5e3b2f629ffeb455"
+                "sha256:1421934d3a8ce86366036faedf6d171c2571166a5856748e1cb6775625b5c75e",
+                "sha256:cf3130a912c4a62b555a1c937e2cb58d1385d28fbe5d786a8342d715c55a7bbd"
             ],
             "index": "pypi",
-            "version": "==0.35.4"
+            "version": "==0.35.5"
         },
         "jupyterlab-launcher": {
             "hashes": [
@@ -753,11 +753,11 @@
         },
         "urllib3": {
             "hashes": [
-                "sha256:61bf29cada3fc2fbefad4fdf059ea4bd1b4a86d2b6d15e1c7c0b582b9752fe39",
-                "sha256:de9529817c93f27c8ccbfead6985011db27bd0ddfcdb2d86f3f663385c6a9c22"
+                "sha256:4c291ca23bbb55c76518905869ef34bdd5f0e46af7afe6861e8375643ffee1a0",
+                "sha256:9a247273df709c4fedb38c711e44292304f73f39ab01beda9f6b9fc375669ac3"
             ],
             "index": "pypi",
-            "version": "==1.24.1"
+            "version": "==1.24.2"
         },
         "urwid": {
             "hashes": [
