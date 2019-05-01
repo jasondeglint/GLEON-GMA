@@ -104,7 +104,7 @@ app.layout = html.Div(children=[
                     id='cyano-method',
                     multi=False,
                     options=[
-                        {'label': 'PIPA', 'value': 'PIPA'},
+                        {'label': 'PPIA', 'value': 'PPIA'},
                         {'label': 'ELISA', 'value': 'ELISA'},
                         {'label': 'LC-MSMS', 'value': 'LC-MSMS'}
                     ],

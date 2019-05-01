@@ -1,3 +1,3 @@
 DB_ID,DB_name,Uploaded_by,Upload_date,Published,Field_method,Lab_method,QA_QC,QA_QC_Request,Cyanotoxin_method,N_lakes,N_samples
-Bigham_Florida_Saba_Ketabchi_20190426_T124505,Bigham Florida,Saba Ketabchi,2019-04-26 12:45:05.888727,,,,,,,183,863
-Zurawell_Alberta_Saba_Ketabchi_20190426_T124521,Zurawell Alberta,Saba Ketabchi,2019-04-26 12:45:21.864577,,,,,,,92,797
+Bigham_et_al._2009_Saba_Ketabchi_20190501_T144432,Bigham et al. 2009,Saba Ketabchi,2019-05-01 14:44:32.249928,https://www.tandfonline.com/doi/pdf/10.1080/07438140903136555,,,,,ELISA,183,863
+Zurawell_2010_Saba_Ketabchi_20190501_T145814,Zurawell 2010,Saba Ketabchi,2019-05-01 14:58:14.582709,https://open.alberta.ca/dataset/b3904ca1-999e-4b6c-b289-9b9756e8e080/resource/b05141d5-381d-4ced-af1e-5094d21d0694/download/8296.pdf,,,,,PPIA,92,797
