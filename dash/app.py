@@ -9,6 +9,7 @@ import data_analysis as da
 from settings import months, metadataDB
 import db_engine as db
 from db_info import db_info
+import urllib.parse
 
 app = dash.Dash(__name__)
 
@@ -178,6 +179,16 @@ app.layout = html.Div(children=[
             style={
                 'margin': '10px 0px 10px 0px' 
             }
+    ),
+
+    html.A(html.Button(id='export-data-button', children='Download Filtered Data',
+    		style={
+                'margin': '10px 0px 10px 10px' 
+            }),
+    	href='',
+    	id='download-link',
+    	download='data.csv',
+    	target='_blank'
     ),
 
     html.Div([
@@ -496,8 +507,24 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         colNames.sort()
         col_options = [{'label': col, 'value': col} for col in colNames]
         col_value = colNames[0]
+        print('Filter')
 
         return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_value, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value
+
+@app.callback(
+ 	dash.dependencies.Output('download-link', 'href'),
+ 	[dash.dependencies.Input('apply-filters-button', 'n_clicks')],
+	[dash.dependencies.State('metadata_table', 'derived_virtual_selected_rows'),
+     dash.dependencies.State('metadata_table', 'derived_virtual_data')])
+def update_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
+	if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:
+
+		selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
+		dff = db.update_dataframe(selected_rows)
+		csv_string = dff.to_csv(index=False, encoding='utf-8')
+		csv_string = "data:text/csv;charset=utf-8," + urllib.parse.quote(csv_string)
+		return csv_string
+
 
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
                 "//fonts.googleapis.com/css?family=Raleway:400,300,600",
