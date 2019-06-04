@@ -47,11 +47,13 @@ app.layout = html.Div(children=[
     html.Div([
         html.Details([
             html.Summary('Upload New Data'),
-            # TODO: use for example csv download
-            # html.Div(children=[ 
-            #     # replace with a URL link once the server is setup 
-            #     html.A('Download Sample File', id='sample-data-link')
-            # ], className="row"),
+            html.Div(children=[ 
+                html.A('Download Example Outline File', 
+                    id='example-outline-link', 
+                    href='assets/GLEON_GMA_Example.csv',
+                    target='_blank',
+                    download='GLEON_GMA_Example.csv')
+            ], className="row"),
 
             html.Div(children=[
                 html.Div([
@@ -515,7 +517,7 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
  	[dash.dependencies.Input('apply-filters-button', 'n_clicks')],
 	[dash.dependencies.State('metadata_table', 'derived_virtual_selected_rows'),
      dash.dependencies.State('metadata_table', 'derived_virtual_data')])
-def update_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
+def update_data_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
 	if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:
 		selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
 		dff = db.update_dataframe(selected_rows)
