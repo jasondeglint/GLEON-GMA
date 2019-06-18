@@ -17,3 +17,7 @@ body {
 .details {
     margin: 2rem;
 }
+
+.Select.is-open {
+    z-index: 1003;
+}

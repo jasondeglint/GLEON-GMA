@@ -183,7 +183,7 @@ def temporal_lake(selected_col, selected_loc, selected_type, current_df):
         xaxis={'title':'Date'},
         yaxis={'title': y_axis}
     )
-    temporal_lake_plot = plot_line(x_data, y_data, layout)
+    temporal_lake_plot = plot_scatter(x_data, y_data, layout)
     return temporal_lake_plot
 
 def temporal_overall(selected_col, selected_type, current_df):
@@ -243,6 +243,24 @@ def temporal_raw(selected_option, selected_col, current_df):
         'layout': layout
     } 
     return temporal_raw_plot
+
+def plot_scatter(x_data, y_data, layout):
+    data = go.Scatter(
+        x=x_data,
+        y=y_data,
+        mode='markers',
+        marker={
+           'opacity': 0.8,
+        },
+        line = {
+            'width': 1.5
+        }
+    )
+    fig = {
+        'data': [data],
+        'layout': layout
+    } 
+    return fig
 
 def plot_line(x_data, y_data, layout):
     data = go.Scatter(
