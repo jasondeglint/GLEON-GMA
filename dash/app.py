@@ -10,11 +10,24 @@ from settings import months, metadataDB
 import db_engine as db
 from db_info import db_info
 import urllib.parse
+from textwrap import dedent as d
 
 app = dash.Dash(__name__)
 
+styles = {
+    'pre': {
+        'border': 'thin lightgrey solid',
+        'overflowX': 'scroll'
+    }
+}
 # initial data frame 
 empty_df = pd.DataFrame()
+
+
+
+df1 = pd.read_csv("https://raw.githubusercontent.com/divyachandran-ds/dash1/master/Energy2.csv")
+df = df1.dropna()
+
 
 def convert_to_json(current_dataframe):
     '''
@@ -39,6 +52,7 @@ def get_metadata_table_content(current_metadata):
     table_df = current_metadata[['DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'Cyanotoxin_method', 'N_lakes', 'N_samples']]
     return table_df.to_dict("rows")
 
+#Website layout HTML code
 app.layout = html.Div(children=[
     html.Div([
         html.H1(children='GLEON MC Data Analysis')
@@ -70,38 +84,138 @@ app.layout = html.Div(children=[
                         dcc.Input(id='db-name', type='text')
                     ], className='one-third column'), 
                 ], className="row"),
-                html.P('Peer-Review or Publication Information'),
-                dcc.Textarea(
-                    id='publication-text',
-                    wrap=True,
-                    draggable=False,
-                    placeholder='Publication URL...',
-                    style={'width': '90%', 'resize':'None'}
+                
+                html.P('Is the data peer reviewed or published?'),
+                dcc.RadioItems(
+                    id="is-data-reviewed",
+                    options=[{'label': 'Yes', 'value': 'is-reviewed'},
+                            {'label': 'No', 'value': 'not-reviewed'}],
+                ),
+                dcc.Input(
+                    placeholder='URL Link',
+                    type='text',
+                    value='',
+                    id='publication-url',
+                    style={'display': 'none'}
+                ),
+                html.P('Is the field method reported?'),
+                dcc.RadioItems(
+                    id="is-field-method-reported",
+                    options=[{'label': 'Yes', 'value': 'fm-reported'},
+                            {'label': 'No', 'value': 'fm-not-reported'}],
+                ),
+                dcc.Input(
+                    placeholder='URL Link',
+                    type='text',
+                    value='',
+                    id='field-method-report-url',
+                    style={'display': 'none'}
+                ),
+                html.P('Is the lab method reported?'),
+                dcc.RadioItems(
+                    id="is-lab-method-reported",
+                    options=[{'label': 'Yes', 'value': 'lm-reported'},
+                            {'label': 'No', 'value': 'lm-not-reported'}],
+                ),
+                dcc.Input(
+                    placeholder='URL Link',
+                    type='text',
+                    value='',
+                    id='lab-method-report-url',
+                    style={'display': 'none'}
+                ),
+                html.P('Is the QA/QC data available?'),
+                dcc.RadioItems(
+                    id="is-qaqc-available",
+                    options=[{'label': 'Yes', 'value': 'qaqc-available'},
+                            {'label': 'No', 'value': 'qaqc-not-available'}],
+                ),
+                dcc.Input(
+                    placeholder='URL Link',
+                    type='text',
+                    value='',
+                    id='qaqc-url',
+                    style={'display': 'none'}
+                ),
+                html.P('Is the full QA/QC data available upon request?'),
+                dcc.RadioItems(
+                    id="is-full-qaqc-available",
+                    options=[{'label': 'Yes', 'value': 'full-qaqc-available'},
+                            {'label': 'No', 'value': 'full-qaqc-not-available'}],
+                ),
+                dcc.Input(
+                    placeholder='URL Link',
+                    type='text',
+                    value='',
+                    id='full-qaqc-url',
+                    style={'display': 'none'}
+                ),
+
+
+                html.P('Substrate'),
+                dcc.Dropdown(
+                    id='substrate-option',
+                    multi=False,
+                    options=[{'label': 'Planktonic', 'value': 'planktonic'},
+                            {'label': 'Beach', 'value': 'beach'},
+                            {'label': 'Periphyton', 'value': 'periphyton'}],
+                    style={
+                        'margin': '0 60px 0 0',
+                        'width': '95%' 
+                    }
+                ),
+                html.P('Sample Types'),
+                dcc.Dropdown(
+                    id='sample-type-option',
+                    multi=False,
+                    options=[{'label': 'Routine Monitoring', 'value': 'routine-monitoring'},
+                            {'label': 'Reactionary Water Column', 'value': 'reactionary-water-column'},
+                            {'label': 'Scum Focused', 'value': 'scum-focused'}],
+                    style={
+                        'margin': '0 60px 0 0',
+                        'width': '95%' 
+                    }
                 ),
                 html.P('Field Methods'),
-                dcc.Textarea(
-                    id='field-method-text',
-                    placeholder='',
-                    style={'width': '90%', 'resize':'None'}
+                dcc.Dropdown(
+                    id='field-method-option',
+                    multi=False,
+                    options=[{'label': 'Vertically Integrated Sample', 'value': 'vertically-integrated'},
+                            {'label': 'Discrete Depth Sample', 'value': 'discrete-depth'},
+                            {'label': 'Spatially Integrated Sample', 'value': 'spatially-integrated'}],
+                    style={
+                        'margin': '0 60px 10px 0',
+                        'width': '95%' 
+                    }
                 ),
-                html.P('Lab Methods'),
-                dcc.Textarea(
-                    id='lab-method-text',
-                    placeholder='',
-                    style={'width': '90%', 'resize':'None'}
+                dcc.Input(
+                    placeholder='Depth Integrated (m)',
+                    type='text',
+                    value='',
+                    id='vertically-depth-integrated',
+                    style={'display': 'none'}
                 ),
-                html.P('QA/QC Data'),
-                dcc.Textarea(
-                    id='QAQC-data-text',
-                    placeholder='',
-                    style={'width': '90%', 'resize':'None'}
+                dcc.Input(
+                    placeholder='Depth Sampled (m)',
+                    type='text',
+                    value='',
+                    id='discrete-depth-sampled',
+                    style={'display': 'none'}
                 ),
-                html.P('Are the full QA/QC data available upon request?'),
-                dcc.Textarea(
-                    id='QAQC-request-text',
-                    placeholder='',
-                    style={'width': '90%', 'resize':'None'}
+                dcc.Input(
+                    placeholder='Depth of Sample (m)',
+                    type='text',
+                    value='',
+                    id='spatially-integrated-depth',
+                    style={'display': 'none'}
                 ),
+                dcc.Input(
+                    placeholder='# of samples integrated',
+                    type='text',
+                    value='',
+                    id='num-spatially-integrated-samples',
+                    style={'display': 'none'}
+                ),  
                 html.P('Cyanotoxin Method'),
                 dcc.Dropdown(
                     id='cyano-method',
@@ -115,7 +229,33 @@ app.layout = html.Div(children=[
                         'margin': '0 60px 0 0',
                         'width': '95%' 
                     }
-                ),         
+                ),
+                html.P('Was Sample Filtered?'),
+                dcc.RadioItems(
+                    id="sample-filtered",
+                    options=[{'label': 'Yes', 'value': 'is-filtered'},
+                            {'label': 'No', 'value': 'not-filtered'}]
+                ),
+                dcc.Input(
+                    placeholder='Filter Size',
+                    type='text',
+                    value='',
+                    id='filter-size',
+                    style={'display': 'none'}
+                ),
+                html.P('Cell count method?'),
+                dcc.Input(
+                    placeholder='URL Link',
+                    type='text',
+                    value='',
+                    id='cell-count-url',
+                ),
+                html.P('Ancillary data available?'),
+                dcc.Textarea(
+                    id='ancillary-data',
+                    placeholder='Description of parameters or URL link'
+                ),
+
                 dcc.Upload(
                         id='upload-data',
                         children=html.Div([
@@ -136,7 +276,7 @@ app.layout = html.Div(children=[
                     multiple=False
                 ),
                 html.Div(id='upload-output'),
-                html.Button(id='done-button', n_clicks=0, children='Done', 
+                html.Button(id='upload-button', n_clicks=0, children='Upload', 
                     style={
                         'margin': '15px 0px 10px 0px'   
                     }
@@ -192,6 +332,69 @@ app.layout = html.Div(children=[
     	download='data.csv',
     	target='_blank'
     ),
+
+    html.Div([
+        html.H2('Raw Data'),
+        dcc.Graph(
+            id="temporal-raw-scatter",
+        ),
+        html.Div([
+            html.Div([
+            html.P("Log Range Y Axis"),
+            dcc.RangeSlider(
+                id="log_range_raw",
+                min=0,
+                step=0.5,
+                marks={
+                    1000: '1',
+                    4000: '100',
+                    7000: '1000',
+                    10000: '10000'},
+                ),
+            ]),
+            html.Div([
+                dcc.RadioItems(
+                    id="temporal-raw-option",
+                    options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
+                            {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
+                            value='RAW'
+                )
+            ], className='six columns'),
+            html.Div([
+                dcc.Dropdown(
+                    id="temporal-raw-col"
+                )
+            ], className='six columns')
+        ])
+    ], className='row'),
+    
+    html.Div([
+        html.H2(''),
+        dcc.Graph(
+            id="comparison_scatter",
+        ),
+        html.Div([
+            html.Div([
+                html.P('Y-axis'),
+                dcc.Dropdown(
+                    id='compare-y-axis',
+                    )], className='six columns'),
+            html.Div([
+                html.P('X-axis'),
+                dcc.Dropdown(
+                    id='compare-x-axis')
+                ], className='six columns')
+            ])
+        ], className='row'),
+
+    # html.Div([
+    #     html.H2('Correlation Matrix'),
+    #     dcc.Graph(id='correlation-graph'),
+    #     html.Div([
+    #         dcc.Dropdown(
+    #             id='correlation-dropdown')
+    #         ], className='six columns')
+    #     ], className='row'),
 
     html.Div([
         html.H2('Microcystin Concentration'),
@@ -306,32 +509,87 @@ app.layout = html.Div(children=[
             id="temporal-avg-col"
         )
     ], className='row'),
-    
-    html.Div([
-        html.H2('Raw Data'),
-        dcc.Graph(
-            id="temporal-raw-scatter",
-        ),
-        html.Div([
-            html.Div([
-                dcc.RadioItems(
-                    id="temporal-raw-option",
-                    options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
-                            {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
-                            value='RAW'
-                )
-            ], className='six columns'),
-            html.Div([
-                dcc.Dropdown(
-                    id="temporal-raw-col"
-                )
-            ], className='six columns')
-        ])
-    ], className='row'),
 
     # Hidden div inside the app that stores the intermediate value
     html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(empty_df))
 ])
+
+
+@app.callback(
+    dash.dependencies.Output('publication-url', 'style'),
+    [dash.dependencies.Input('is-data-reviewed', 'value')]
+    )
+def show_peer_review_url(is_peer_reviewed):
+    if  is_peer_reviewed == 'is-reviewed':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+@app.callback(
+    dash.dependencies.Output('field-method-report-url', 'style'),
+    [dash.dependencies.Input('is-field-method-reported', 'value')]
+    )
+def show_field_method_url(is_fm_reported):
+    if  is_fm_reported == 'fm-reported':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+@app.callback(
+    dash.dependencies.Output('lab-method-report-url', 'style'),
+    [dash.dependencies.Input('is-lab-method-reported', 'value')]
+    )
+def show_lab_method_url(is_lm_reported):
+    if  is_lm_reported == 'lm-reported':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+@app.callback(
+    dash.dependencies.Output('qaqc-url', 'style'),
+    [dash.dependencies.Input('is-qaqc-available', 'value')]
+    )
+def show_qaqc_url(is_qaqc_available):
+    if  is_qaqc_available == 'qaqc-available':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+@app.callback(
+    dash.dependencies.Output('full-qaqc-url', 'style'),
+    [dash.dependencies.Input('is-full-qaqc-available', 'value')]
+    )
+def show_full_qaqc_url(is_full_qaqc_available):
+    if  is_full_qaqc_available == 'full-qaqc-available':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+@app.callback(
+    [dash.dependencies.Output('vertically-depth-integrated', 'style'),
+    dash.dependencies.Output('discrete-depth-sampled', 'style'), 
+    dash.dependencies.Output('spatially-integrated-depth', 'style'),
+    dash.dependencies.Output('num-spatially-integrated-samples', 'style')],
+    [dash.dependencies.Input('field-method-option', 'value')])
+def show_field_option_input(field_option):
+    if field_option == 'vertically-integrated':
+        return {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+    if field_option == 'discrete-depth':
+        return {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}
+    if field_option == 'spatially-integrated':
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, {'display': 'block'}
+    else:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+
+@app.callback(
+    dash.dependencies.Output('filter-size', 'style'),
+    [dash.dependencies.Input('sample-filtered', 'value')]
+    )
+def show_filter_size(visibility_state):
+    if visibility_state == 'is-filtered':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
 
 @app.callback(
     dash.dependencies.Output('metadata_table', 'data'),
@@ -340,6 +598,13 @@ def upload_file(n_clicks):
     # read from MetadataDB to update the table 
     metadataDB = pd.read_csv("data/MetadataDB.csv")
     return get_metadata_table_content(metadataDB)   
+
+
+# @app.callback(
+#     dash.dependencies.Output('hover-data', 'children'),
+#     [dash.dependencies.Input('temporal-raw-scatter', 'hoverData')])
+# def display_hover_data_raw(hoverData):
+#     return json.dumps(hoverData, indent=2)
 
 @app.callback(
     dash.dependencies.Output('geo_plot', 'figure'),
@@ -350,6 +615,24 @@ def upload_file(n_clicks):
 def update_geo_plot(selected_years, selected_month, geo_option, jsonified_data):
     dff = convert_to_df(jsonified_data)
     return da.geo_plot(selected_years, selected_month, geo_option, dff)
+
+# @app.callback(
+#     dash.dependencies.Output('comparison_scatter', 'figure'),
+#     [dash.dependencies.Input('compare-y-axis', 'value'),
+#     dash.dependencies.Input('compare-x-axis', 'value'),
+#     dash.dependencies.Input('intermediate-value', 'children')])
+# def update_comparison(selected_y, selected_x, jsonified_data):
+#     dff = convert_to_df(jsonified_data)
+#     return da.comparison_plot(selected_y, selected_x, dff)
+
+# @app.callback(
+#     dash.dependencies.Output('correlation-graph', 'figure'),
+#     [dash.dependencies.Input('correlation-dropdown', 'value'),
+#     dash.dependencies.Input('intermediate-value', 'children')])
+# def update_correlation(selected_col, jsonified_data):
+#     dff = convert_to_df(jsonified_data)
+#     return da.correlation_plot(selected_col, dff)
+
 
 @app.callback(
     dash.dependencies.Output('temporal-lake-scatter', 'figure'),
@@ -398,10 +681,12 @@ def update_output(selected_col, jsonified_data):
     dash.dependencies.Output('temporal-raw-scatter', 'figure'),
     [dash.dependencies.Input('temporal-raw-option', 'value'),
      dash.dependencies.Input('temporal-raw-col', 'value'),
-     dash.dependencies.Input('intermediate-value', 'children')])
-def update_output(selected_option, selected_col, jsonified_data):
+     dash.dependencies.Input('log_range_raw', 'value'),
+     dash.dependencies.Input('intermediate-value', 'children')
+])
+def update_output(selected_option, selected_col, log_range, jsonified_data):
     dff = convert_to_df(jsonified_data)
-    return da.temporal_raw(selected_option, selected_col, dff)
+    return da.temporal_raw(selected_option, selected_col, log_range, dff)
 
 @app.callback(dash.dependencies.Output('upload-output', 'children'),
               [dash.dependencies.Input('upload-data', 'contents')],
@@ -414,19 +699,25 @@ def update_uploaded_file(contents, filename):
 
 @app.callback(
     dash.dependencies.Output('upload-msg', 'children'),
-    [dash.dependencies.Input('done-button', 'n_clicks')],
+    [dash.dependencies.Input('upload-button', 'n_clicks')],
     [dash.dependencies.State('db-name', 'value'),
     dash.dependencies.State('user-name', 'value'),
     dash.dependencies.State('user-inst', 'value'),
     dash.dependencies.State('upload-data', 'contents'),
     dash.dependencies.State('upload-data', 'filename'),
-    dash.dependencies.State('publication-text', 'value'),
-    dash.dependencies.State('field-method-text', 'value'),
-    dash.dependencies.State('lab-method-text', 'value'),
-    dash.dependencies.State('QAQC-data-text', 'value'),
-    dash.dependencies.State('QAQC-request-text', 'value'),
-    dash.dependencies.State('cyano-method', 'value')])
-def upload_file(n_clicks, dbname, username, userinst, contents, filename, publicationText, fieldMText, labMText, QAQCText, QAQCRequest, cyanoMethod):
+    dash.dependencies.State('publication-url', 'value'),
+    dash.dependencies.State('field-method-report-url', 'value'),
+    dash.dependencies.State('lab-method-report-url', 'value'),
+    dash.dependencies.State('qaqc-url', 'value'),
+    dash.dependencies.State('full-qaqc-url', 'value'),
+    dash.dependencies.State('substrate-option', 'value'),
+    dash.dependencies.State('sample-type-option', 'value'),
+    dash.dependencies.State('field-method-option', 'value'),
+    dash.dependencies.State('cyano-method', 'value'),
+    dash.dependencies.State('filter-size', 'value'),
+    dash.dependencies.State('cell-count-url', 'value'),
+    dash.dependencies.State('ancillary-data', 'value')])
+def upload_file(n_clicks, dbname, username, userinst, contents, filename, publicationURL, fieldMURL, labMURL, QAQCUrl, fullQAQCUrl, substrate, sampleType, fieldMethod, cyanoMethod, filterSize, cellCountURL, ancillaryURL):
     if n_clicks != None and n_clicks > 0:
         if username == None or not username.strip():
             return 'Name field cannot be empty.'
@@ -439,14 +730,18 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename, public
         else:
             new_db = db_info(dbname, username, userinst)
 
-            # update db_info variables 
-            new_db.db_publication = publicationText
-            new_db.db_field_method = fieldMText
-            new_db.db_lab_method = labMText
-            new_db.db_lab_method = labMText
-            new_db.db_QACA = QAQCText
-            new_db.db_QACA_request = QAQCRequest
+            new_db.db_publication_url = publicationURL
+            new_db.db_field_method_url = fieldMURL
+            new_db.db_lab_method_url = labMURL
+            new_db.db_QAQC_url = QAQCUrl
+            new_db.db_full_QAQC_url = fullQAQCUrl
+            new_db.db_substrate = substrate
+            new_db.db_sample_type = sampleType
+            new_db.db_field_method = fieldMethod
             new_db.db_cyano_method = cyanoMethod
+            new_db.db_filter_size = filterSize
+            new_db.db_cell_count_method = cellCountURL
+            new_db.db_ancillary_url = ancillaryURL
 
             return db.upload_new_database(new_db, contents, filename)
 
@@ -465,7 +760,13 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename, public
      dash.dependencies.Output('temporal-avg-col', 'options'),
      dash.dependencies.Output('temporal-avg-col', 'value'),
      dash.dependencies.Output('temporal-raw-col', 'options'),
-     dash.dependencies.Output('temporal-raw-col', 'value')],
+     dash.dependencies.Output('temporal-raw-col', 'value'),
+     dash.dependencies.Output('log_range_raw', 'max'),
+     dash.dependencies.Output('log_range_raw', 'value'), 
+     dash.dependencies.Output('compare-y-axis', 'options'),
+     dash.dependencies.Output('compare-y-axis', 'value'),
+     dash.dependencies.Output('compare-x-axis', 'options'),
+     dash.dependencies.Output('compare-x-axis', 'value')],   #dash.dependencies.Output('correlation-dropdown', 'options')
     [dash.dependencies.Input('apply-filters-button', 'n_clicks')],
     [dash.dependencies.State('metadata_table', 'derived_virtual_selected_rows'),
     dash.dependencies.State('metadata_table', 'derived_virtual_data')])
@@ -475,6 +776,9 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
         new_df = db.update_dataframe(selected_rows)    
         jsonStr = convert_to_json(new_df)
+
+        raw_range_max = np.max(new_df["Microcystin (ug/L)"])
+        raw_range_value = [0, np.max(new_df["Microcystin (ug/L)"])]
 
         tn_max = np.max(new_df["Total Nitrogen (ug/L)"])
         tn_value = [0, np.max(new_df["Total Nitrogen (ug/L)"])]
@@ -509,8 +813,9 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         colNames.sort()
         col_options = [{'label': col, 'value': col} for col in colNames]
         col_value = colNames[0]
+        col_value_next = colNames[1]
 
-        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_value, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value
+        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_value, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value, raw_range_max, raw_range_value, col_options, col_value, col_options, col_value_next
 
 @app.callback(
  	dash.dependencies.Output('download-link', 'href'),

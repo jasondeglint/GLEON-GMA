@@ -62,7 +62,6 @@ pipenv run python app.py
 
 ### Next Steps
 1. Server Setup 
-2. Export Data Feature: Allow the users to download selected data
-3. Adding instructions along with the sample database file (i.e. "GLEON_GMA_Example.xlsx") to be downloaded by the users in the upload section
-4. Additional Graphs: Going through the Dash User Guide will be helpful with the setup of various graphs, some of the helpful visualizations that can be added such as "Update on Hover" and "Crossfilter" are listed in the "Interactive Visualizations" section (https://dash.plot.ly/interactive-graphing). In addition, the filtered graph in the "Basic Dash Callbacks" section might be useful (https://dash.plot.ly/getting-started-part-2). 
-5. Additional Questionnaire Sections: More details can be added in the data upload section from the "GLEON_GMA_Categorical_questions.xlsx" file 
+2. Adding instructions to use sample database file
+3. Additional Graphs: Going through the Dash User Guide will be helpful with the setup of various graphs, some of the helpful visualizations that can be added such as "Update on Hover" and "Crossfilter" are listed in the "Interactive Visualizations" section (https://dash.plot.ly/interactive-graphing). In addition, the filtered graph in the "Basic Dash Callbacks" section might be useful (https://dash.plot.ly/getting-started-part-2). 
+4. Add correlation matrix graph

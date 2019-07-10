@@ -4,6 +4,8 @@ import plotly.graph_objs as go
 import re
 from settings import months, USEPA_LIMIT, WHO_LIMIT 
 
+
+
 def geo_log_plot(selected_data, current_df):
     selected_data["MC_pc_bin"] = np.log(np.abs(selected_data["MC Percent Change"]) + 1)
     data = [go.Scattergeo(
@@ -80,6 +82,7 @@ def geo_concentration_plot(selected_data):
             marker=dict(color="red",opacity = opacity_level)))
        
     layout = go.Layout(showlegend=True,
+                        hovermode='closest',
                         title="Microcystin Concentration",
                         geo = dict(
                                 scope='north america',
@@ -130,6 +133,7 @@ def tn_tp(tn_val, tp_val, current_df):
         y=np.log(b1["Total Phosphorus (ug/L)"]),
         mode = 'markers',
         name="<USEPA",
+        text=current_df["Body of Water Name"],
         marker=dict(
             size=8,
             color = "green", #set color equal to a variable
@@ -139,6 +143,7 @@ def tn_tp(tn_val, tp_val, current_df):
         y=np.log(b2["Total Phosphorus (ug/L)"]),
         mode = 'markers',
         name=">USEPA",
+        text=current_df["Body of Water Name"],
         marker=dict(
             size=8,
             color = "orange" #set color equal to a variable
@@ -148,6 +153,7 @@ def tn_tp(tn_val, tp_val, current_df):
         y=np.log(b3["Total Phosphorus (ug/L)"]),
         mode = 'markers',
         name=">WHO",
+        text=current_df["Body of Water Name"],
         marker=dict(
             size=8,
             color = "red", #set color equal to a variable
@@ -158,10 +164,65 @@ def tn_tp(tn_val, tp_val, current_df):
         xaxis=dict(
             title='log TN'),
         yaxis=dict(
-            title="log TP")
+            title="log TP"),
+        hovermode='closest'
         )
 
     return (go.Figure(data=data, layout=layout))
+
+# def correlation_plot(selected_col, current_df):
+#     # selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
+#     # selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
+
+#     selected_data = current_df['DATETIME', selected_col]
+
+#     x_data = selected_data['DATETIME']
+#     y_data = selected_data['Body of Water Name']
+#     z_data = selected_data[selected_col]
+
+#     trace = go.Heatmap(
+#         x=x_data, 
+#         y=y_data, 
+#         z=z_data,
+#         showscale=True,
+#         colorscale='Electric')
+
+#     layout = go.Layout(
+#         title= '%s vs Date' %selected_col, #stripped 
+#         xaxis={'title':'Date'},
+#         yaxis={'title': str(selected_col)}
+#     )
+
+#     correlation_plot = {
+#         'data': [trace],
+#         'layout': layout
+#     }
+#     return correlation_plot
+
+
+def comparison_plot(selected_y, selected_x, current_df):
+    selected_data = current_df[[selected_y, selected_x]]
+
+    x_data = selected_data[selected_x]
+    y_data = selected_data[selected_y]
+
+    data = go.Scatter(
+        x=x_data,
+        y=y_data, 
+        mode='markers')
+
+    layout = go.Layout(
+        title = "Comparison",
+        xaxis={'title':str(selected_x)},
+        yaxis={'title':str(selected_y)},
+        hovermode='closest'
+        )
+
+    comaprison_plot = {
+        'data': [data],
+        'layout': layout
+    }
+
 
 def temporal_lake(selected_col, selected_loc, selected_type, current_df):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
@@ -181,7 +242,8 @@ def temporal_lake(selected_col, selected_loc, selected_type, current_df):
     layout = go.Layout(
         title= title, 
         xaxis={'title':'Date'},
-        yaxis={'title': y_axis}
+        yaxis={'title': y_axis},
+        hovermode='closest'
     )
     temporal_lake_plot = plot_scatter(x_data, y_data, layout)
     return temporal_lake_plot
@@ -207,12 +269,22 @@ def temporal_overall(selected_col, selected_type, current_df):
     layout = go.Layout(
         title= title, 
         xaxis={'title':'Date'},
-        yaxis={'title': y_axis}
+        yaxis={'title': y_axis},
+        hovermode='closest'
     )
     temporal_overall_plot = plot_line(x_data, y_data, layout)
     return temporal_overall_plot
 
-def temporal_raw(selected_option, selected_col, current_df):
+def temporal_raw(selected_option, selected_col, log_range, current_df):
+
+    # min_log = log_range[0]
+    # max_log = log_range[1]
+
+    # if max_log == 0:
+    #     max_log = np.max(current_df[selected_col])
+
+    # dat = current_df[(current_df[selected_col] >= min_log) & (current_df[selected_col] <= max_log)]
+
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
     selected_data = current_df[['DATETIME', selected_col]]
@@ -224,12 +296,14 @@ def temporal_raw(selected_option, selected_col, current_df):
     layout = go.Layout(
         title= '%s vs Date' %selected_col_stripped, 
         xaxis={'title':'Date'},
-        yaxis={'title': str(selected_col)}
+        yaxis={'title': str(selected_col)},
+        hovermode='closest'
     )
     
     data = go.Scatter(
         x=x_data,
         y=y_data,
+        text= "Lake: " + current_df["Body of Water Name"],
         mode='markers',
         marker={
            'opacity': 0.8,
@@ -238,6 +312,7 @@ def temporal_raw(selected_option, selected_col, current_df):
             'width': 1.5
         }
     )
+
     temporal_raw_plot = {
         'data': [data],
         'layout': layout

@@ -131,12 +131,18 @@ def update_metadata(new_dbinfo, current_metadata):
                                 'DB_name': [new_dbinfo.db_name],
                                 'Uploaded_by': [new_dbinfo.uploaded_by],
                                 'Upload_date': [new_dbinfo.upload_date],
-                                'Published': [new_dbinfo.db_publication],
-                                'Field_method': [new_dbinfo.db_field_method],
-                                'Lab_method': [new_dbinfo.db_lab_method],
-                                'QA_QC': [new_dbinfo.db_QACA],
-                                'QA_QC_Request': [new_dbinfo.db_QACA_request],
+                                'Published_url': [new_dbinfo.db_publication_url], #url
+                                'Field_method_url': [new_dbinfo.db_field_method_url], #url
+                                'Lab_method_url': [new_dbinfo.db_lab_method_url], #url
+                                'QA_QC_url': [new_dbinfo.db_QAQC_url], #url
+                                'Full_QA_QC_url': [new_dbinfo.db_full_QCQC_url], #url
+                                'Substrate': [new_dbinfo.db_substrate],
+                                'Sample_type': [new_dbinfo.db_sample_type],
+                                'Field-method': [new_dbinfo.db_field_method],
                                 'Cyanotoxin_method': [new_dbinfo.db_cyano_method],
+                                'Filter_size': [new_dbinfo.db_filter_size],
+                                'Cell_count_method': [new_dbinfo.db_cell_count_method],
+                                'Ancillary_data': [new_dbinfo.db_ancillary_url],
                                 'N_lakes': [new_dbinfo.db_num_lakes],
                                 'N_samples': [new_dbinfo.db_num_samples]})
 
