@@ -62,6 +62,11 @@ app.layout = html.Div(children=[
         html.Details([
             html.Summary('Upload New Data'),
             html.Div(children=[ 
+                html.H4('How to Upload Data'),
+                html.P('1. Download the outline file below and copy the appropriate data into the csv file.'),
+                html.P('2. Fill out the questionnaire below with appropriate information and links as needed.'),
+                html.P('3. Select or drag and drop the filled out csv file containing your data.'),
+                html.P('4. Click \'Upload\' to upload your data and information to the project.'),
                 html.A('Download Example Outline File', 
                     id='example-outline-link', 
                     href='assets/GLEON_GMA_Example.csv',
