@@ -23,8 +23,6 @@ styles = {
 # initial data frame 
 empty_df = pd.DataFrame()
 
-
-
 df1 = pd.read_csv("https://raw.githubusercontent.com/divyachandran-ds/dash1/master/Energy2.csv")
 df = df1.dropna()
 
@@ -372,9 +370,8 @@ app.layout = html.Div(children=[
             ], className='six columns')
         ])
     ], className='row'),
-    
+
     html.Div([
-        html.H2(''),
         dcc.Graph(
             id="comparison_scatter",
         ),
@@ -621,14 +618,14 @@ def update_geo_plot(selected_years, selected_month, geo_option, jsonified_data):
     dff = convert_to_df(jsonified_data)
     return da.geo_plot(selected_years, selected_month, geo_option, dff)
 
-# @app.callback(
-#     dash.dependencies.Output('comparison_scatter', 'figure'),
-#     [dash.dependencies.Input('compare-y-axis', 'value'),
-#     dash.dependencies.Input('compare-x-axis', 'value'),
-#     dash.dependencies.Input('intermediate-value', 'children')])
-# def update_comparison(selected_y, selected_x, jsonified_data):
-#     dff = convert_to_df(jsonified_data)
-#     return da.comparison_plot(selected_y, selected_x, dff)
+@app.callback(
+    dash.dependencies.Output('comparison_scatter', 'figure'),
+    [dash.dependencies.Input('compare-y-axis', 'value'),
+    dash.dependencies.Input('compare-x-axis', 'value'),
+    dash.dependencies.Input('intermediate-value', 'children')])
+def update_comparison(selected_y, selected_x, jsonified_data):
+    dff = convert_to_df(jsonified_data)
+    return da.comparison_plot(selected_y, selected_x, dff)
 
 # @app.callback(
 #     dash.dependencies.Output('correlation-graph', 'figure'),

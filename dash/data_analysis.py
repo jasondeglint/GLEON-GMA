@@ -212,16 +212,17 @@ def comparison_plot(selected_y, selected_x, current_df):
         mode='markers')
 
     layout = go.Layout(
-        title = "Comparison",
+        title = '%s vs %s' % (selected_y, selected_x),
         xaxis={'title':str(selected_x)},
         yaxis={'title':str(selected_y)},
         hovermode='closest'
         )
 
-    comaprison_plot = {
+    comparison_plot = {
         'data': [data],
         'layout': layout
     }
+    return comparison_plot
 
 
 def temporal_lake(selected_col, selected_loc, selected_type, current_df):
@@ -245,8 +246,13 @@ def temporal_lake(selected_col, selected_loc, selected_type, current_df):
         yaxis={'title': y_axis},
         hovermode='closest'
     )
-    temporal_lake_plot = plot_scatter(x_data, y_data, layout)
-    return temporal_lake_plot
+
+    if selected_type == 'raw':
+        temporal_lake_plot = plot_scatter(x_data, y_data, layout)
+    else:
+        temporal_lake_plot = plot_line(x_data, y_data, layout)
+
+        return temporal_lake_plot
 
 def temporal_overall(selected_col, selected_type, current_df):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
@@ -272,7 +278,11 @@ def temporal_overall(selected_col, selected_type, current_df):
         yaxis={'title': y_axis},
         hovermode='closest'
     )
-    temporal_overall_plot = plot_line(x_data, y_data, layout)
+
+    if selected_type == 'avg':
+        temporal_overall_plot = plot_scatter(x_data, y_data, layout)
+    else:
+        temporal_overall_plot = plot_line(x_data, y_data, layout)
     return temporal_overall_plot
 
 def temporal_raw(selected_option, selected_col, log_range, current_df):
