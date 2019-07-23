@@ -62,7 +62,7 @@ app.layout = html.Div(children=[
             html.Div(children=[ 
                 html.H4('How to Upload Data'),
                 html.P('1. Download the outline file below and copy the appropriate data into the csv file.'),
-                html.P('2. Fill out the questionnaire below with appropriate information and links as needed.'),
+                html.P('2. Fill out the metadata questionnaire below with appropriate information and links as needed.'),
                 html.P('3. Select or drag and drop the filled out csv file containing your data.'),
                 html.P('4. Click \'Upload\' to upload your data and information to the project.'),
                 html.A('Download Example Outline File', 
@@ -240,7 +240,7 @@ app.layout = html.Div(children=[
                             {'label': 'No', 'value': 'not-filtered'}]
                 ),
                 dcc.Input(
-                    placeholder='Filter Size',
+                    placeholder='Filter Size (μm)',
                     type='text',
                     value='',
                     id='filter-size',
@@ -343,7 +343,7 @@ app.layout = html.Div(children=[
         ),
         html.Div([
             html.Div([
-            html.P("Log Range Y Axis"),
+            html.P("Y-Axis Range"),
             dcc.RangeSlider(
                 id="log_range_raw",
                 min=0,
@@ -359,6 +359,7 @@ app.layout = html.Div(children=[
                 dcc.RadioItems(
                     id="temporal-raw-option",
                     options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
+                            {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
                             {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
                             value='RAW'
                 )

@@ -287,13 +287,14 @@ def temporal_overall(selected_col, selected_type, current_df):
 
 def temporal_raw(selected_option, selected_col, log_range, current_df):
 
-    # min_log = log_range[0]
-    # max_log = log_range[1]
+    min_log = log_range[0]
+    max_log = log_range[1]
 
-    # if max_log == 0:
-    #     max_log = np.max(current_df[selected_col])
+    if max_log == 0:
+        max_log = np.max(current_df[selected_col])
 
-    # dat = current_df[(current_df[selected_col] >= min_log) & (current_df[selected_col] <= max_log)]
+    dat = current_df[(current_df[selected_col] >= min_log) & (current_df[selected_col] <= max_log)]
+    MC_conc = dat['Microcystin (ug/L)']
 
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
@@ -301,7 +302,9 @@ def temporal_raw(selected_option, selected_col, log_range, current_df):
     if selected_option == '3SD':
         selected_data = selected_data[((selected_data[selected_col] - selected_data[selected_col].mean()) / selected_data[selected_col].std()).abs() < 3]
     x_data = selected_data['DATETIME']
-    y_data = selected_data[selected_col]
+    y_data = MC_conc
+    if selected_option == 'LOG':
+        y_data = np.log(MC_conc)
 
     layout = go.Layout(
         title= '%s vs Date' %selected_col_stripped, 

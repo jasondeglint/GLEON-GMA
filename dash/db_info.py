@@ -6,8 +6,8 @@ class db_info:
         self.db_name = db_name
         self.uploaded_by = uploaded_by
         self.institution = institution
-        self.upload_date = current_date.strftime("%Y%m%d")
-        self.db_id = db_name.replace(" ", "_") + '_' + uploaded_by.replace(" ", "_") + '_' + current_date.strftime("%Y%m%d")
+        self.upload_date = current_date.strftime("%Y\%m\%d")
+        self.db_id = db_name.replace(" ", "_") + '_' + uploaded_by.replace(" ", "_") + '_' + current_date.strftime("%Y\%m\%d")
         
         self.db_publication_url = ''
         self.db_field_method_url = ''
