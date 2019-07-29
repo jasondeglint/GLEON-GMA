@@ -32,7 +32,9 @@ def parse_new_database(new_dbinfo, new_df):
     """
         Convert CSV or Excel file data into Pickle file and store in the data directory
     """    
-    try:        
+    try:
+        print('hi')
+        print(new_df['LakeName'])
         # delete the extra composite section of the lake names - if they have any
         new_df['LakeName'] = new_df['LakeName'].\
             str.replace(r"[-]?.COMPOSITE(.*)", "", regex=True).\

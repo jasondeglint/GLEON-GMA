@@ -10,7 +10,6 @@ from settings import months, metadataDB
 import db_engine as db
 from db_info import db_info
 import urllib.parse
-from textwrap import dedent as d
 
 app = dash.Dash(__name__)
 
@@ -67,9 +66,9 @@ app.layout = html.Div(children=[
                 html.P('4. Click \'Upload\' to upload your data and information to the project.'),
                 html.A('Download Example Outline File', 
                     id='example-outline-link', 
-                    href='assets/GLEON_GMA_Example.csv',
+                    href='assets/GLEON_GMA_Example.xlsx',
                     target='_blank',
-                    download='GLEON_GMA_Example.csv')
+                    download='GLEON_GMA_Example.xlsx')
             ], className="row"),
 
             html.Div(children=[
@@ -732,7 +731,6 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename, public
             return 'Please select a file.'
         else:
             new_db = db_info(dbname, username, userinst)
-
             new_db.db_publication_url = publicationURL
             new_db.db_field_method_url = fieldMURL
             new_db.db_lab_method_url = labMURL

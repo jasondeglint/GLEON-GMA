@@ -36,7 +36,7 @@ def geo_log_plot(selected_data, current_df):
     layout = go.Layout(title='Log Microcystin Concentration Change',
                         showlegend=False,
                         geo = dict(
-                                scope='north america',
+                                scope='world',
                                 showframe = False,
                                 showcoastlines = True,
                                 showlakes = True,
@@ -49,14 +49,14 @@ def geo_log_plot(selected_data, current_df):
     return fig
 
 def geo_concentration_plot(selected_data):
-    traces = []
+    data = []
     opacity_level = 0.8
     MC_conc = selected_data['Microcystin (ug/L)']
     # make bins
     b1 = selected_data[MC_conc <= USEPA_LIMIT]
     b2 = selected_data[(MC_conc > USEPA_LIMIT) & (MC_conc <= WHO_LIMIT)]
     b3 = selected_data[MC_conc > WHO_LIMIT]
-    traces.append(go.Scattergeo(
+    data.append(go.Scattergeo(
             lon = b1['LONG'],
             lat = b1['LAT'],
             mode = 'markers',
@@ -64,7 +64,7 @@ def geo_concentration_plot(selected_data):
             visible = True,
             name = "MC <= USEPA Limit",
             marker=dict(color="green",opacity = opacity_level)))
-    traces.append(go.Scattergeo(
+    data.append(go.Scattergeo(
             lon = b2['LONG'],
             lat = b2['LAT'],
             mode = 'markers',
@@ -72,7 +72,7 @@ def geo_concentration_plot(selected_data):
             visible = True,
             name = "MC <= WHO Limit",
             marker=dict(color="orange",opacity = opacity_level)))
-    traces.append(go.Scattergeo(
+    data.append(go.Scattergeo(
             lon = b3['LONG'],
             lat = b3['LAT'],
             mode = 'markers',
@@ -85,8 +85,8 @@ def geo_concentration_plot(selected_data):
                         hovermode='closest',
                         title="Microcystin Concentration",
                         geo = dict(
-                                scope='north america',
-                                showframe = True,
+                                scope='world',
+                                showframe = False,
                                 showcoastlines = True,
                                 showlakes = True,
                                 showland = True,
@@ -94,7 +94,7 @@ def geo_concentration_plot(selected_data):
                                 showrivers = True
                             ))
 
-    fig = go.Figure(layout=layout, data=traces)  
+    fig = go.Figure(layout=layout, data=data)  
     return fig
 
 def geo_plot(selected_years, selected_month, geo_option, current_df):
@@ -230,6 +230,7 @@ def temporal_lake(selected_col, selected_loc, selected_type, current_df):
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
  
     selected_data = current_df[current_df['Body of Water Name'] == selected_loc]
+    print(selected_data)
     x_data=pd.to_datetime(selected_data['DATETIME'])
     if selected_type=='raw':
         y_data=selected_data[selected_col]
@@ -246,13 +247,9 @@ def temporal_lake(selected_col, selected_loc, selected_type, current_df):
         yaxis={'title': y_axis},
         hovermode='closest'
     )
+    temporal_lake_plot = plot_line(x_data, y_data, layout)
 
-    if selected_type == 'raw':
-        temporal_lake_plot = plot_scatter(x_data, y_data, layout)
-    else:
-        temporal_lake_plot = plot_line(x_data, y_data, layout)
-
-        return temporal_lake_plot
+    return temporal_lake_plot
 
 def temporal_overall(selected_col, selected_type, current_df):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
@@ -278,11 +275,8 @@ def temporal_overall(selected_col, selected_type, current_df):
         yaxis={'title': y_axis},
         hovermode='closest'
     )
-
-    if selected_type == 'avg':
-        temporal_overall_plot = plot_scatter(x_data, y_data, layout)
-    else:
-        temporal_overall_plot = plot_line(x_data, y_data, layout)
+    temporal_overall_plot = plot_line(x_data, y_data, layout)
+    
     return temporal_overall_plot
 
 def temporal_raw(selected_option, selected_col, log_range, current_df):
