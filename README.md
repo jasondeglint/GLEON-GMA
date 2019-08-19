@@ -61,7 +61,11 @@ pipenv run python app.py
 ```
 
 ### Next Steps
-1. Server Setup 
+1. Publish website to VPS to go live and begin taking in data files
 2. Adding instructions to use sample database file
 3. Additional Graphs: Going through the Dash User Guide will be helpful with the setup of various graphs, some of the helpful visualizations that can be added such as "Update on Hover" and "Crossfilter" are listed in the "Interactive Visualizations" section (https://dash.plot.ly/interactive-graphing). In addition, the filtered graph in the "Basic Dash Callbacks" section might be useful (https://dash.plot.ly/getting-started-part-2). 
 4. Add correlation matrix graph
+
+### Known Issues
+1. Correlation matrix graph is not functional
+2. Newly uploaded datasets lose something in the "update_dataframe" function in db_engine.py and cannot be loaded after uploading
