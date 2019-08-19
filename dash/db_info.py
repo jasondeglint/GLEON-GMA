@@ -17,7 +17,7 @@ class db_info:
         self.db_substrate = ''
         self.db_sample_type = ''
         self.db_field_method = ''
-        self.db_cyano_method = ''
+        self.db_microcystin_method = ''
         self.db_filter_size = ''
         self.db_cell_count_method = ''
         self.db_ancillary_url = ''

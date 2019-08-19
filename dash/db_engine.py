@@ -33,15 +33,14 @@ def parse_new_database(new_dbinfo, new_df):
         Convert CSV or Excel file data into Pickle file and store in the data directory
     """    
     try:
-        print('hi')
-        print(new_df['LakeName'])
+
         # delete the extra composite section of the lake names - if they have any
         new_df['LakeName'] = new_df['LakeName'].\
             str.replace(r"[-]?.COMPOSITE(.*)", "", regex=True).\
             str.strip()
         
         new_df['Date'] = pd.to_datetime(new_df['Date']).dt.strftime('%Y-%m-%d %H:%M:%S')
-
+        print(new_df['LakeName'])
         # convert mg to ug
         new_df['TP_mgL'] *= 1000
         new_df['TN_mgL'] *= 1000
@@ -141,7 +140,7 @@ def update_metadata(new_dbinfo, current_metadata):
                                 'Substrate': [new_dbinfo.db_substrate],
                                 'Sample_type': [new_dbinfo.db_sample_type],
                                 'Field-method': [new_dbinfo.db_field_method],
-                                'Cyanotoxin_method': [new_dbinfo.db_cyano_method],
+                                'Microcystin_method': [new_dbinfo.db_microcystin_method],
                                 'Filter_size': [new_dbinfo.db_filter_size],
                                 'Cell_count_method': [new_dbinfo.db_cell_count_method],
                                 'Ancillary_data': [new_dbinfo.db_ancillary_url],
@@ -167,7 +166,7 @@ def update_dataframe(selected_rows):
             filepath = get_pkl_path(rowid)
             db_data = pd.read_pickle(filepath)
             new_dataframe = pd.concat([new_dataframe, db_data], sort=False).reset_index(drop=True)
-       
+            print("dataframe = ", new_dataframe)
         # Ratio of Total Nitrogen to Total Phosphorus
         new_dataframe["TN:TP"] = new_dataframe["Total Nitrogen (ug/L)"]/new_dataframe["Total Phosphorus (ug/L)"]
 
@@ -178,6 +177,7 @@ def update_dataframe(selected_rows):
         new_dataframe["MC Percent Change"] = new_dataframe.sort_values("DATETIME").\
                                             groupby(['LONG','LAT'])["Microcystin (ug/L)"].\
                                             apply(lambda x: x.pct_change()).fillna(0)
+        print(new_dataframe)
         return new_dataframe
     except Exception as e:
         print(e)

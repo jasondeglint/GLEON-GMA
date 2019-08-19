@@ -103,7 +103,7 @@ def geo_plot(selected_years, selected_month, geo_option, current_df):
 
     month = pd.to_datetime(current_df['DATETIME']).dt.month
     year = pd.to_datetime(current_df['DATETIME']).dt.year
-    selected_data = current_df[(month == selected_month) & (year.isin(selected_years))]
+    selected_data = current_df[(month.isin(selected_month)) & (year.isin(selected_years))]
     if geo_option == "CONC":
         return geo_concentration_plot(selected_data)
     else:
@@ -170,34 +170,36 @@ def tn_tp(tn_val, tp_val, current_df):
 
     return (go.Figure(data=data, layout=layout))
 
-# def correlation_plot(selected_col, current_df):
-#     # selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
-#     # selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
+def correlation_plot(selected_dataset, current_df):
+    # selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
+    # selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
 
-#     selected_data = current_df['DATETIME', selected_col]
+    selected_data = current_df['DATETIME', selected_dataset]
 
-#     x_data = selected_data['DATETIME']
-#     y_data = selected_data['Body of Water Name']
-#     z_data = selected_data[selected_col]
+    # calculate correlation coefficient for each point as the z data
 
-#     trace = go.Heatmap(
-#         x=x_data, 
-#         y=y_data, 
-#         z=z_data,
-#         showscale=True,
-#         colorscale='Electric')
 
-#     layout = go.Layout(
-#         title= '%s vs Date' %selected_col, #stripped 
-#         xaxis={'title':'Date'},
-#         yaxis={'title': str(selected_col)}
-#     )
+    # x_data = [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]
+    # y_data = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    # z_data = ["morning", "afternoon", "evening"]
 
-#     correlation_plot = {
-#         'data': [trace],
-#         'layout': layout
-#     }
-#     return correlation_plot
+    data = go.Heatmap(
+        x=selected_data, 
+        y=selected_data,
+        z=z_data 
+        )
+
+    layout = go.Layout(
+        title= '%s vs Date' %selected_x, #stripped 
+        # xaxis={'title':'Date'},
+        # yaxis={'title': str(selected_x)}
+    )
+    print("I made a correlation plot")
+    correlation_plot = {
+        'data': data,
+        'layout': layout
+    }
+    return correlation_plot
 
 
 def comparison_plot(selected_y, selected_x, current_df):
@@ -230,16 +232,23 @@ def temporal_lake(selected_col, selected_loc, selected_type, current_df):
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
  
     selected_data = current_df[current_df['Body of Water Name'] == selected_loc]
-    print(selected_data)
     x_data=pd.to_datetime(selected_data['DATETIME'])
-    if selected_type=='raw':
-        y_data=selected_data[selected_col]
-        title = '%s Trends' % (selected_col_stripped)
-        y_axis = str(selected_col)
+    print(len(selected_data[selected_col]))
+    
+    if len(selected_data[selected_col]) >= 3:
+        if selected_type=='raw':
+            y_data=selected_data[selected_col]
+            print(len(y_data))
+            title = '%s Trends' % (selected_col_stripped)
+            y_axis = str(selected_col)
+        else:
+            y_data=selected_data[selected_col].pct_change()
+            title = 'Percent Change in %s Trends' % (selected_col_stripped)
+            y_axis = 'Percent Change in %s' % (selected_col_stripped)
     else:
-        y_data=selected_data[selected_col].pct_change()
-        title = 'Percent Change in %s Trends' % (selected_col_stripped)
-        y_axis = 'Percent Change in %s' % (selected_col_stripped)
+        title = ''
+        y_data = []
+        y_axis = ''
     
     layout = go.Layout(
         title= title, 

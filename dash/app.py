@@ -46,7 +46,7 @@ def get_metadata_table_content(current_metadata):
         returns the data for the specified columns of the metadata data table 
     '''
     
-    table_df = current_metadata[['DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'Cyanotoxin_method', 'N_lakes', 'N_samples']]
+    table_df = current_metadata[['DB_ID', 'DB_name', 'Uploaded_by', 'Upload_date', 'Microcystin_method', 'N_lakes', 'N_samples']]
     return table_df.to_dict("rows")
 
 #Website layout HTML code
@@ -218,9 +218,9 @@ app.layout = html.Div(children=[
                     id='num-spatially-integrated-samples',
                     style={'display': 'none'}
                 ),  
-                html.P('Cyanotoxin Method'),
+                html.P('Microcystin Method'),
                 dcc.Dropdown(
-                    id='cyano-method',
+                    id='microcystin-method',
                     multi=False,
                     options=[
                         {'label': 'PPIA', 'value': 'PPIA'},
@@ -303,7 +303,7 @@ app.layout = html.Div(children=[
             {'name': 'Database Name', 'id': 'DB_name'},
             {'name': 'Uploaded By', 'id': 'Uploaded_by'},
             {'name': 'Upload Date', 'id': 'Upload_date'},
-            {'name': 'Cyanotoxin Method', 'id': 'Cyanotoxin_method'},
+            {'name': 'Microcystin Method', 'id': 'Microcystin_method'},
             {'name': 'Number of Lakes', 'id': 'N_lakes'},
             {'name': 'Number of Samples', 'id': 'N_samples'},],
         data=get_metadata_table_content(metadataDB), 
@@ -336,6 +336,38 @@ app.layout = html.Div(children=[
     ),
 
     html.Div([
+        html.H2('Microcystin Concentration'),
+        dcc.Graph(id='geo_plot'),
+        html.Div([
+            dcc.RadioItems(
+            id="geo_plot_option",
+            options=[{'label': 'Show Concentration Plot', 'value': 'CONC'},
+                    {'label': 'Show Log Concentration Change Plot', 'value': 'LOG'}],
+                    value='CONC'),
+        ]),
+        html.Div([
+            html.Div(html.P("Year:")),
+            html.Div(
+                dcc.Dropdown(
+                    id='year-dropdown',
+                    multi=True
+                ),
+            )
+        ]),
+        html.Div([
+            html.P("Month:"),
+            dcc.RangeSlider(
+                id='month-slider',
+                min=0,
+                max=11,
+                value=[0,11],
+                # included=False,
+                marks={i: months[i] for i in range(len(months))}
+            )
+        ]),
+    ], className="row"),
+
+    html.Div([
         html.H2('Raw Data'),
         dcc.Graph(
             id="temporal-raw-scatter",
@@ -344,31 +376,31 @@ app.layout = html.Div(children=[
             html.Div([
             html.P("Y-Axis Range"),
             dcc.RangeSlider(
-                id="log_range_raw",
+                id="axis_range_raw",
                 min=0,
                 step=0.5,
                 marks={
-                    1000: '1',
-                    4000: '100',
-                    7000: '1000',
+                    1: '1',
+                    100: '100',
+                    1000: '1000',
                     10000: '10000'},
                 ),
-            ]),
-            html.Div([
-                dcc.RadioItems(
-                    id="temporal-raw-option",
-                    options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
-                            {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
-                            {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
-                            value='RAW'
-                )
-            ], className='six columns'),
+            ], style={'marginBottom': 30}),            
+        ]),
+        html.Div([
             html.Div([
                 dcc.Dropdown(
                     id="temporal-raw-col"
-                )
-            ], className='six columns')
-        ])
+                )], className='six columns'),
+            html.Div([
+                dcc.RadioItems(
+                id="temporal-raw-option",
+                options=[{'label': 'Show All Raw Data', 'value': 'RAW'},
+                        {'label': 'Apply Log10 to Raw Data', 'value': 'LOG'},
+                        {'label': 'Show Data Within 3 Standard Deviations', 'value': '3SD'}],
+                        value='RAW')
+            ], className='six columns'),
+        ])    
     ], className='row'),
 
     html.Div([
@@ -389,46 +421,17 @@ app.layout = html.Div(children=[
             ])
         ], className='row'),
 
-    # html.Div([
-    #     html.H2('Correlation Matrix'),
-    #     dcc.Graph(id='correlation-graph'),
-    #     html.Div([
-    #         dcc.Dropdown(
-    #             id='correlation-dropdown')
-    #         ], className='six columns')
-    #     ], className='row'),
-
     html.Div([
-        html.H2('Microcystin Concentration'),
-        dcc.Graph(id='geo_plot'),
+        html.H2('Correlation Matrix'),
+        dcc.Graph(id='correlation-graph'),
         html.Div([
-            dcc.RadioItems(
-            id="geo_plot_option",
-            options=[{'label': 'Show Concentration Plot', 'value': 'CONC'},
-                    {'label': 'Show Log Concentration Change Plot', 'value': 'LOG'}],
-                    value='CONC'),
-        ]),
-        html.Div([
-            html.Div(html.P("Year:")),
-            html.Div(
+            html.Div([
+                html.P('Dataset'),
                 dcc.Dropdown(
-                    id='year-dropdown',
-                    multi=True,
-                ),
-            )
-        ]),
-        html.Div([
-            html.P("Month:"),
-            dcc.Slider(
-                id='month-slider',
-                min=0,
-                max=11,
-                value=1,
-                included=False,
-                marks={i: months[i] for i in range(len(months))}
-            )
-        ]),
-    ], className="row"),
+                    id='correlation-dropdown'),
+                ], className='six columns')
+            ])
+        ], className='row'),
     
     html.Div([
         html.H2('Total Phosphorus vs Total Nitrogen'),
@@ -470,6 +473,7 @@ app.layout = html.Div(children=[
     
     html.Div([
         html.H2('Data Trends by Lake'),
+        html.P('Lakes require at least three data points to have a trendline', id='lake-minimum-points'),
         html.Div([
             html.Div([
                 dcc.Graph(
@@ -599,14 +603,7 @@ def show_filter_size(visibility_state):
 def upload_file(n_clicks):
     # read from MetadataDB to update the table 
     metadataDB = pd.read_csv("data/MetadataDB.csv")
-    return get_metadata_table_content(metadataDB)   
-
-
-# @app.callback(
-#     dash.dependencies.Output('hover-data', 'children'),
-#     [dash.dependencies.Input('temporal-raw-scatter', 'hoverData')])
-# def display_hover_data_raw(hoverData):
-#     return json.dumps(hoverData, indent=2)
+    return get_metadata_table_content(metadataDB)
 
 @app.callback(
     dash.dependencies.Output('geo_plot', 'figure'),
@@ -627,13 +624,13 @@ def update_comparison(selected_y, selected_x, jsonified_data):
     dff = convert_to_df(jsonified_data)
     return da.comparison_plot(selected_y, selected_x, dff)
 
-# @app.callback(
-#     dash.dependencies.Output('correlation-graph', 'figure'),
-#     [dash.dependencies.Input('correlation-dropdown', 'value'),
-#     dash.dependencies.Input('intermediate-value', 'children')])
-# def update_correlation(selected_col, jsonified_data):
-#     dff = convert_to_df(jsonified_data)
-#     return da.correlation_plot(selected_col, dff)
+@app.callback(
+    dash.dependencies.Output('correlation-graph', 'figure'),
+    [dash.dependencies.Input('correlation-dropdown', 'value'),
+    dash.dependencies.Input('intermediate-value', 'children')])
+def update_correlation(selected_x, selected_y, jsonified_data):
+    dff = convert_to_df(jsonified_data)
+    return da.correlation_plot(selected_x, selected_y, dff)
 
 
 @app.callback(
@@ -683,7 +680,7 @@ def update_output(selected_col, jsonified_data):
     dash.dependencies.Output('temporal-raw-scatter', 'figure'),
     [dash.dependencies.Input('temporal-raw-option', 'value'),
      dash.dependencies.Input('temporal-raw-col', 'value'),
-     dash.dependencies.Input('log_range_raw', 'value'),
+     dash.dependencies.Input('axis_range_raw', 'value'),
      dash.dependencies.Input('intermediate-value', 'children')
 ])
 def update_output(selected_option, selected_col, log_range, jsonified_data):
@@ -715,11 +712,11 @@ def update_uploaded_file(contents, filename):
     dash.dependencies.State('substrate-option', 'value'),
     dash.dependencies.State('sample-type-option', 'value'),
     dash.dependencies.State('field-method-option', 'value'),
-    dash.dependencies.State('cyano-method', 'value'),
+    dash.dependencies.State('microcystin-method', 'value'),
     dash.dependencies.State('filter-size', 'value'),
     dash.dependencies.State('cell-count-url', 'value'),
     dash.dependencies.State('ancillary-data', 'value')])
-def upload_file(n_clicks, dbname, username, userinst, contents, filename, publicationURL, fieldMURL, labMURL, QAQCUrl, fullQAQCUrl, substrate, sampleType, fieldMethod, cyanoMethod, filterSize, cellCountURL, ancillaryURL):
+def upload_file(n_clicks, dbname, username, userinst, contents, filename, publicationURL, fieldMURL, labMURL, QAQCUrl, fullQAQCUrl, substrate, sampleType, fieldMethod, microcystinMethod, filterSize, cellCountURL, ancillaryURL):
     if n_clicks != None and n_clicks > 0:
         if username == None or not username.strip():
             return 'Name field cannot be empty.'
@@ -739,7 +736,7 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename, public
             new_db.db_substrate = substrate
             new_db.db_sample_type = sampleType
             new_db.db_field_method = fieldMethod
-            new_db.db_cyano_method = cyanoMethod
+            new_db.db_microcystin_method = microcystinMethod
             new_db.db_filter_size = filterSize
             new_db.db_cell_count_method = cellCountURL
             new_db.db_ancillary_url = ancillaryURL
@@ -762,12 +759,14 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename, public
      dash.dependencies.Output('temporal-avg-col', 'value'),
      dash.dependencies.Output('temporal-raw-col', 'options'),
      dash.dependencies.Output('temporal-raw-col', 'value'),
-     dash.dependencies.Output('log_range_raw', 'max'),
-     dash.dependencies.Output('log_range_raw', 'value'), 
+     dash.dependencies.Output('axis_range_raw', 'max'),
+     dash.dependencies.Output('axis_range_raw', 'value'), 
      dash.dependencies.Output('compare-y-axis', 'options'),
      dash.dependencies.Output('compare-y-axis', 'value'),
      dash.dependencies.Output('compare-x-axis', 'options'),
-     dash.dependencies.Output('compare-x-axis', 'value')],   #dash.dependencies.Output('correlation-dropdown', 'options')
+     dash.dependencies.Output('compare-x-axis', 'value'),
+     dash.dependencies.Output('correlation-dropdown', 'options'),
+     dash.dependencies.Output('correlation-dropdown', 'value')],  
     [dash.dependencies.Input('apply-filters-button', 'n_clicks')],
     [dash.dependencies.State('metadata_table', 'derived_virtual_selected_rows'),
     dash.dependencies.State('metadata_table', 'derived_virtual_data')])
@@ -775,7 +774,15 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
     if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:       
         # update the user's data based on the selected databases 
         selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
-        new_df = db.update_dataframe(selected_rows)    
+        new_df = db.update_dataframe(selected_rows)  
+
+        correlation_notice = {'display': 'block'}
+        db_name = [{'label': row['DB_name'], 'value': row['DB_name']} for row in selected_rows]
+        
+        db_value = db_name[0]
+        print(db_next)
+        print(db_value)
+        
         jsonStr = convert_to_json(new_df)
 
         raw_range_max = np.max(new_df["Microcystin (ug/L)"])
@@ -791,7 +798,6 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         year = pd.to_datetime(new_df['DATETIME']).dt.year
         years = range(np.min(year), np.max(year)+1)
         years_options = [{'label': str(y), 'value': y} for y in years]
-        years_value = np.min(years)
 
         # update the lake locations 
         locs = list(new_df["Body of Water Name"].unique())
@@ -815,8 +821,9 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         col_options = [{'label': col, 'value': col} for col in colNames]
         col_value = colNames[0]
         col_value_next = colNames[1]
+        print(col_options)
 
-        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_value, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value, raw_range_max, raw_range_value, col_options, col_value, col_options, col_value_next
+        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_options, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value, raw_range_max, raw_range_value, col_options, col_value, col_options, col_value_next, db_name, db_value
 
 @app.callback(
  	dash.dependencies.Output('download-link', 'href'),
@@ -827,7 +834,7 @@ def update_data_download_link(n_clicks, derived_virtual_selected_rows, dt_rows):
 	if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:
 		selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
 		dff = db.update_dataframe(selected_rows)
-        
+
 		csv_string = dff.to_csv(index=False, encoding='utf-8')
 		csv_string = "data:text/csv;charset=utf-8," + urllib.parse.quote(csv_string)
 		return csv_string
