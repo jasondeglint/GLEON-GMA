@@ -422,17 +422,17 @@ app.layout = html.Div(children=[
         ], className='row'),
 
     # INCOMPLETE: correlation matrix for a single dataset to show a heatmap of correlations (Michael will finish this)
-    html.Div([
-        html.H2('Correlation Matrix'),
-        dcc.Graph(id='correlation-graph'),
-        html.Div([
-            html.Div([
-                html.P('Dataset'),
-                dcc.Dropdown(
-                    id='correlation-dropdown'),
-                ], className='six columns')
-            ])
-        ], className='row'),
+    # html.Div([
+    #     html.H2('Correlation Matrix'),
+    #     dcc.Graph(id='correlation-graph'),
+    #     html.Div([
+    #         html.Div([
+    #             html.P('Dataset'),
+    #             dcc.Dropdown(
+    #                 id='correlation-dropdown'),
+    #             ], className='six columns')
+    #         ])
+    #     ], className='row'),
     
     html.Div([
         html.H2('Total Phosphorus vs Total Nitrogen'),
@@ -622,14 +622,14 @@ def update_comparison(selected_y, selected_x, jsonified_data):
     dff = convert_to_df(jsonified_data)
     return da.comparison_plot(selected_y, selected_x, dff)
 
-@app.callback(
-    dash.dependencies.Output('correlation-graph', 'figure'),
-    [dash.dependencies.Input('correlation-dropdown', 'value'),
-    dash.dependencies.Input('intermediate-value', 'children')])
-def update_correlation(selected_dataset, jsonified_data):
-    dff = convert_to_df(jsonified_data)
-    return da.correlation_plot(selected_dataset, dff)
-
+# TODO: Correlation matrix in progress
+# @app.callback(
+#     dash.dependencies.Output('correlation-graph', 'figure'),
+#     [dash.dependencies.Input('correlation-dropdown', 'value'),
+#     dash.dependencies.Input('intermediate-value', 'children')])
+# def update_correlation(selected_dataset, jsonified_data):
+#     dff = convert_to_df(jsonified_data)
+#     return da.correlation_plot(selected_dataset, dff)
 
 @app.callback(
     dash.dependencies.Output('temporal-lake-scatter', 'figure'),
@@ -762,9 +762,9 @@ def upload_file(n_clicks, dbname, username, userinst, contents, filename, public
      dash.dependencies.Output('compare-y-axis', 'options'),
      dash.dependencies.Output('compare-y-axis', 'value'),
      dash.dependencies.Output('compare-x-axis', 'options'),
-     dash.dependencies.Output('compare-x-axis', 'value'),
-     dash.dependencies.Output('correlation-dropdown', 'options'),
-     dash.dependencies.Output('correlation-dropdown', 'value')],  
+     dash.dependencies.Output('compare-x-axis', 'value')],
+     #dash.dependencies.Output('correlation-dropdown', 'options'),
+     #dash.dependencies.Output('correlation-dropdown', 'value')] -- for correlation matrix  
     [dash.dependencies.Input('apply-filters-button', 'n_clicks')],
     [dash.dependencies.State('metadata_table', 'derived_virtual_selected_rows'),
     dash.dependencies.State('metadata_table', 'derived_virtual_data')])
@@ -820,7 +820,7 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         col_value = colNames[0]
         col_value_next = colNames[1]
 
-        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_options, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value, raw_range_max, raw_range_value, col_options, col_value, col_options, col_value_next, db_name, db_value
+        return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_options, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value, raw_range_max, raw_range_value, col_options, col_value, col_options, col_value_next, # db_name, db_value
 
 # Update the download link to contain the data from the selected datasheets
 @app.callback(
