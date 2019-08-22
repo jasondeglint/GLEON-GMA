@@ -64,13 +64,16 @@ app.layout = html.Div(children=[
                 html.P('2. Fill out the metadata questionnaire below with appropriate information and links as needed.'),
                 html.P('3. Select or drag and drop the filled out csv file containing your data.'),
                 html.P('4. Click \'Upload\' to upload your data and information to the project.'),
-                html.A('Download Example Outline File', 
+                # TODO: datasheet outline is required for db to parse data correctly from spreadsheet, need to make this clearer to 
+                # users when we go live
+                html.A('Download Datasheet Outline File', 
                     id='example-outline-link', 
                     href='assets/GLEON_GMA_Example.xlsx',
                     target='_blank',
                     download='GLEON_GMA_Example.xlsx')
             ], className="row"),
 
+            # Upload New Data questionnaire 
             html.Div(children=[
                 html.Div([
                     html.Div([
@@ -93,6 +96,7 @@ app.layout = html.Div(children=[
                     options=[{'label': 'Yes', 'value': 'is-reviewed'},
                             {'label': 'No', 'value': 'not-reviewed'}],
                 ),
+                # if answered yes, URL link field appears for user to submit an appropriate link
                 dcc.Input(
                     placeholder='URL Link',
                     type='text',
@@ -153,7 +157,6 @@ app.layout = html.Div(children=[
                     style={'display': 'none'}
                 ),
 
-
                 html.P('Substrate'),
                 dcc.Dropdown(
                     id='substrate-option',
@@ -193,28 +196,24 @@ app.layout = html.Div(children=[
                 dcc.Input(
                     placeholder='Depth Integrated (m)',
                     type='text',
-                    value='',
                     id='vertically-depth-integrated',
                     style={'display': 'none'}
                 ),
                 dcc.Input(
                     placeholder='Depth Sampled (m)',
                     type='text',
-                    value='',
                     id='discrete-depth-sampled',
                     style={'display': 'none'}
                 ),
                 dcc.Input(
                     placeholder='Depth of Sample (m)',
                     type='text',
-                    value='',
                     id='spatially-integrated-depth',
                     style={'display': 'none'}
                 ),
                 dcc.Input(
                     placeholder='# of samples integrated',
                     type='text',
-                    value='',
                     id='num-spatially-integrated-samples',
                     style={'display': 'none'}
                 ),  
@@ -241,7 +240,6 @@ app.layout = html.Div(children=[
                 dcc.Input(
                     placeholder='Filter Size (μm)',
                     type='text',
-                    value='',
                     id='filter-size',
                     style={'display': 'none'}
                 ),
@@ -299,6 +297,7 @@ app.layout = html.Div(children=[
         columns=[
             # the column names are seen in the UI but the id should be the same as dataframe col name 
             # the DB ID column is hidden - later used to find DB pkl files in the filtering process
+            # TODO: add column for field method in table
             {'name': 'Database ID', 'id': 'DB_ID', 'hidden':True},
             {'name': 'Database Name', 'id': 'DB_name'},
             {'name': 'Uploaded By', 'id': 'Uploaded_by'},
@@ -324,7 +323,7 @@ app.layout = html.Div(children=[
                 'margin': '10px 0px 10px 0px' 
             }
     ),
-
+    # Export the selected datasets in a single csv file
     html.A(html.Button(id='export-data-button', children='Download Filtered Data',
     		style={
                 'margin': '10px 0px 10px 10px' 
@@ -334,7 +333,7 @@ app.layout = html.Div(children=[
     	download='data.csv',
     	target='_blank'
     ),
-
+    # Geographical world map showing concentration locations
     html.Div([
         html.H2('Microcystin Concentration'),
         dcc.Graph(id='geo_plot'),
@@ -403,6 +402,7 @@ app.layout = html.Div(children=[
         ])    
     ], className='row'),
 
+    # comparison graph between two selected categories for the selected data
     html.Div([
         dcc.Graph(
             id="comparison_scatter",
@@ -421,6 +421,7 @@ app.layout = html.Div(children=[
             ])
         ], className='row'),
 
+    # INCOMPLETE: correlation matrix for a single dataset to show a heatmap of correlations (Michael will finish this)
     html.Div([
         html.H2('Correlation Matrix'),
         dcc.Graph(id='correlation-graph'),
@@ -435,11 +436,9 @@ app.layout = html.Div(children=[
     
     html.Div([
         html.H2('Total Phosphorus vs Total Nitrogen'),
-
         dcc.Graph(
             id="tn_tp_scatter",
         ),
-
         html.Div([
             html.P("Log TN:"),
             dcc.RangeSlider(
@@ -454,7 +453,6 @@ app.layout = html.Div(children=[
                 },
             ),
         ]),
-
         html.Div([
             html.P("Log TP:"),
             dcc.RangeSlider(
@@ -520,7 +518,7 @@ app.layout = html.Div(children=[
     html.Div(id='intermediate-value', style={'display': 'none'}, children=convert_to_json(empty_df))
 ])
 
-
+# Controls if text fields are visible based on selected options in upload questionnaire
 @app.callback(
     dash.dependencies.Output('publication-url', 'style'),
     [dash.dependencies.Input('is-data-reviewed', 'value')]
@@ -628,9 +626,9 @@ def update_comparison(selected_y, selected_x, jsonified_data):
     dash.dependencies.Output('correlation-graph', 'figure'),
     [dash.dependencies.Input('correlation-dropdown', 'value'),
     dash.dependencies.Input('intermediate-value', 'children')])
-def update_correlation(selected_x, selected_y, jsonified_data):
+def update_correlation(selected_dataset, jsonified_data):
     dff = convert_to_df(jsonified_data)
-    return da.correlation_plot(selected_x, selected_y, dff)
+    return da.correlation_plot(selected_dataset, dff)
 
 
 @app.callback(
@@ -638,7 +636,7 @@ def update_correlation(selected_x, selected_y, jsonified_data):
     [dash.dependencies.Input('temporal-lake-col', 'value'),
      dash.dependencies.Input('temporal-lake-location', 'value'),
      dash.dependencies.Input('intermediate-value', 'children')])
-def update_output(selected_col, selected_loc, jsonified_data):
+def update_temporal_output(selected_col, selected_loc, jsonified_data):
     dff = convert_to_df(jsonified_data)
     return da.temporal_lake(selected_col, selected_loc, 'raw', dff)
 
@@ -774,17 +772,17 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
     if n_clicks != None and n_clicks > 0 and derived_virtual_selected_rows is not None:       
         # update the user's data based on the selected databases 
         selected_rows = [dt_rows[i] for i in derived_virtual_selected_rows]
-        new_df = db.update_dataframe(selected_rows)  
+        new_df = db.update_dataframe(selected_rows)
+        print("NEW DF: ", new_df)
 
+        # List of datasets and notice for correlation matrix
         correlation_notice = {'display': 'block'}
         db_name = [{'label': row['DB_name'], 'value': row['DB_name']} for row in selected_rows]
-        
         db_value = db_name[0]
-        print(db_next)
-        print(db_value)
         
         jsonStr = convert_to_json(new_df)
 
+        # update range for raw data graph
         raw_range_max = np.max(new_df["Microcystin (ug/L)"])
         raw_range_value = [0, np.max(new_df["Microcystin (ug/L)"])]
 
@@ -821,10 +819,10 @@ def update_graph(n_clicks, derived_virtual_selected_rows, dt_rows):
         col_options = [{'label': col, 'value': col} for col in colNames]
         col_value = colNames[0]
         col_value_next = colNames[1]
-        print(col_options)
 
         return jsonStr, tn_max, tn_value, tp_max, tp_value, years_options, years_options, locs_options, locs_value, col_options, col_value, col_options, col_value, col_options, col_value, raw_range_max, raw_range_value, col_options, col_value, col_options, col_value_next, db_name, db_value
 
+# Update the download link to contain the data from the selected datasheets
 @app.callback(
  	dash.dependencies.Output('download-link', 'href'),
  	[dash.dependencies.Input('apply-filters-button', 'n_clicks')],

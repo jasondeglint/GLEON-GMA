@@ -5,7 +5,6 @@ import re
 from settings import months, USEPA_LIMIT, WHO_LIMIT 
 
 
-
 def geo_log_plot(selected_data, current_df):
     selected_data["MC_pc_bin"] = np.log(np.abs(selected_data["MC Percent Change"]) + 1)
     data = [go.Scattergeo(
@@ -171,13 +170,13 @@ def tn_tp(tn_val, tp_val, current_df):
     return (go.Figure(data=data, layout=layout))
 
 def correlation_plot(selected_dataset, current_df):
+    # IN PROGRESS
     # selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     # selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
 
     selected_data = current_df['DATETIME', selected_dataset]
 
     # calculate correlation coefficient for each point as the z data
-
 
     # x_data = [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]
     # y_data = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
@@ -188,19 +187,16 @@ def correlation_plot(selected_dataset, current_df):
         y=selected_data,
         z=z_data 
         )
-
     layout = go.Layout(
         title= '%s vs Date' %selected_x, #stripped 
         # xaxis={'title':'Date'},
         # yaxis={'title': str(selected_x)}
     )
-    print("I made a correlation plot")
     correlation_plot = {
         'data': data,
         'layout': layout
     }
     return correlation_plot
-
 
 def comparison_plot(selected_y, selected_x, current_df):
     selected_data = current_df[[selected_y, selected_x]]
@@ -225,7 +221,6 @@ def comparison_plot(selected_y, selected_x, current_df):
         'layout': layout
     }
     return comparison_plot
-
 
 def temporal_lake(selected_col, selected_loc, selected_type, current_df):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
@@ -302,6 +297,7 @@ def temporal_raw(selected_option, selected_col, log_range, current_df):
     selected_col_stripped = re.sub("[\(\[].*?[\)\]]", "", selected_col)
     selected_col_stripped = re.sub('\s+', ' ', selected_col_stripped).strip()
     selected_data = current_df[['DATETIME', selected_col]]
+    
     if selected_option == '3SD':
         selected_data = selected_data[((selected_data[selected_col] - selected_data[selected_col].mean()) / selected_data[selected_col].std()).abs() < 3]
     x_data = selected_data['DATETIME']
@@ -334,24 +330,6 @@ def temporal_raw(selected_option, selected_col, log_range, current_df):
         'layout': layout
     } 
     return temporal_raw_plot
-
-def plot_scatter(x_data, y_data, layout):
-    data = go.Scatter(
-        x=x_data,
-        y=y_data,
-        mode='markers',
-        marker={
-           'opacity': 0.8,
-        },
-        line = {
-            'width': 1.5
-        }
-    )
-    fig = {
-        'data': [data],
-        'layout': layout
-    } 
-    return fig
 
 def plot_line(x_data, y_data, layout):
     data = go.Scatter(

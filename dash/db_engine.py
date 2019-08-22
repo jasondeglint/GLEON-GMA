@@ -156,8 +156,7 @@ def update_metadata(new_dbinfo, current_metadata):
 def update_dataframe(selected_rows):    
     """
         update dataframe based on selected databases 
-    """ 
-
+    """
     try:
         new_dataframe = pd.DataFrame()    
         # Read in data from selected Pickle files into Pandas dataframes, and concatenate the data
@@ -166,21 +165,21 @@ def update_dataframe(selected_rows):
             filepath = get_pkl_path(rowid)
             db_data = pd.read_pickle(filepath)
             new_dataframe = pd.concat([new_dataframe, db_data], sort=False).reset_index(drop=True)
-            print("dataframe = ", new_dataframe)
-        # Ratio of Total Nitrogen to Total Phosphorus
-        new_dataframe["TN:TP"] = new_dataframe["Total Nitrogen (ug/L)"]/new_dataframe["Total Phosphorus (ug/L)"]
 
+        # Ratio of Total Nitrogen to Total Phosphorus
+        # This line causes a problem on certain datasets as the columns are strings instead of ints and will not divide, dataset dependent
+        print(new_dataframe["Total Nitrogen (ug/L)"])
+        print("Phosphorus: ", new_dataframe["Total Phosphorus (ug/L)"])
+        new_dataframe["TN:TP"] = new_dataframe["Total Nitrogen (ug/L)"]/new_dataframe["Total Phosphorus (ug/L)"]
         # Ration of Microcystin to Total Chlorophyll
         new_dataframe["Microcystin:Chlorophyll a"] = new_dataframe["Microcystin (ug/L)"]/new_dataframe["Total Chlorophyll a (ug/L)"]
-
         # Percent change of microcystin
         new_dataframe["MC Percent Change"] = new_dataframe.sort_values("DATETIME").\
                                             groupby(['LONG','LAT'])["Microcystin (ug/L)"].\
                                             apply(lambda x: x.pct_change()).fillna(0)
-        print(new_dataframe)
         return new_dataframe
     except Exception as e:
-        print(e)
+        print("EXCEPTION: ", e)
 
 def get_pkl_path(db_id):
     return 'data/' + db_id + '.pkl'
