@@ -72,3 +72,4 @@ pipenv run python app.py
 ### Known Issues
 1. Some newly uploaded datasets have a problem when updating in updating_dataframe in db_engine.py, dataframe column dividing throws an exception
 2. Alligator Lake in the Bigham dataset has a strange trend pattern due to samples being taken from different locations on the lake
+3. When Graphs are loaded, geographical graph will not show dots. Requires a selected year to be removed for the graph to update (may publish map before the options are selected upon loading) 
