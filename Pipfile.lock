@@ -788,7 +788,7 @@
                 "sha256:d5da73735293558eb1651ee2fddc4d0dedcfa06538b8813a2e20011583c9e49b"
             ],
             "index": "pypi",
-            "version": "==0.14.1"
+            "version": "==0.15.5"
         },
         "widgetsnbextension": {
             "hashes": [
